@@ -6,3 +6,7 @@ Dangling pointers, double-frees, and null pointer dereferences are all caught at
 Parallel Programming Is Tamed
 And Yet Rust Is Still Fast
 Rust Makes Collaboration Easier
+
+Install Rust on your computer:-
+The best way to install Rust is to use rustup. Go to https://rustup.rs and follow the instructions there.
+We prefer rustup because it’s a tool for managing Rust installations, like RVM for Ruby or NVM for Node. For example, when a new version of Rust is released, you’ll be able to upgrade with zero clicks by typing rustup update.
