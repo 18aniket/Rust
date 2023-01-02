@@ -22,3 +22,6 @@ rustc 1.66.0 (69f9c33d7 2022-12-12)
 $rustdoc --version
 rustdoc 1.66.0 (69f9c33d7 2022-12-12)
 
+cargo is Rust’s compilation manager, package manager, and general-purpose tool. You can use Cargo to start a new project, build and run your program, and manage any external libraries your code depends on.
+rustc is the Rust compiler. Usually we let Cargo invoke the compiler for us, but sometimes it’s useful to run it directly.
+rustdoc is the Rust documentation tool. If you write documentation in comments of the appropriate form in your program’s source code, rustdoc can build nicely formatted HTML from them. Like rustc, we usually let Cargo run rustdoc for us.
