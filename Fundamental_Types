@@ -81,3 +81,7 @@ For example, a function that returns no value has a return type of ().
 The declaration for std::mem::swap reads:
 
 fn swap<T>(x: &mut T, y: &mut T);
+
+If you like, you may include a comma after a tuple’s last element: the types (&str, i32,) and (&str, i32) are equivalent, as are the expressions ("Brazil", 1985,) and ("Brazil", 1985). 
+For consistency’s sake, there are even tuples that contain a single value. The literal ("lonely hearts",) is a tuple containing a single string; its type is (&str,).
+Here, the comma after the value is necessary to distinguish the singleton tuple from a simple parenthetic expression.
