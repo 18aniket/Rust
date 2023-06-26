@@ -4,9 +4,9 @@ If you need those sorts of numeric representations, they are supported in the "n
 
 Size (bits)	Unsigned integer	Signed integer	Floating-point
   8	              u8	              i8	 
-  16	            u16	              i16	 
-  32	            u32	              i32	        f32
-  64	            u64	              i64	        f64
+  16	            u16	                 i16	 
+  32	            u32	                 i32	        f32
+  64	            u64	                 i64	        f64
   128	            u128	            i128	 
 Machine word	    usize	            isize	 
 
