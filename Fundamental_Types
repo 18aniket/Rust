@@ -10,7 +10,7 @@ Size (bits)	Unsigned integer	Signed integer	Floating-point
   128	            u128	            i128	 
 Machine word	    usize	            isize	 
 
-Here, a machine word is a value the size of an address on the machine the code runs on, 32 or 64 bits
+Here, a machine word is a value the size of an address on the machine the code runs on, 32 or 64 bits.
 
 Rust uses the u8 type for byte values. For example, reading data from a binary file or socket yields a stream of u8 values.
 Unlike C and C++, Rust treats characters as distinct from the numeric types: a char is not a u8, nor is it a u32 (though it is 32 bits long). 
@@ -24,4 +24,8 @@ compared with another value of a particular type, or something like that.
 In the end, if multiple types could work, Rust defaults to i32 if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
 
 Although numeric types and the char type are distinct, Rust does provide byte literals, character-like literals for u8 values: b'X' represents the ASCII code for the character X, as a u8 value. 
-For example, since the ASCII code for A is 65, the literals b'A' and 65u8 are exactly equivalent. Only ASCII characters may appear in byte literals
+For example, since the ASCII code for A is 65, the literals b'A' and 65u8 are exactly equivalent. Only ASCII characters may appear in byte literals.
+
+Floating-Point Types
+--------------------
+Rust’s f32 and f64 correspond to the float and double types in C and C++ (in implementations that support IEEE floating point) as well as Java (which always uses IEEE floating point).
