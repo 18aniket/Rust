@@ -7,3 +7,56 @@ rustc :-  is the Rust compiler. Usually we let Cargo invoke the compiler for us,
 
 rustdoc :-  is the Rust documentation tool.
 If you write documentation in comments of the appropriate form in your program’s source code, rustdoc can build nicely formatted HTML from them. Like rustc, we usually let Cargo run rustdoc for us.
+
+Cargo can create a new Rust package for us, with some standard metadata arranged appropriately:
+
+$ cargo new hello
+     Created binary (application) `hello` package
+This command creates a new package directory named hello, ready to build a command-line executable.
+
+Looking inside the package’s top-level directory.
+
+$ cd hello
+$ ls -la
+total 24
+drwxrwxr-x.  4 jimb jimb 4096 Sep 22 21:09 .
+drwx------. 62 jimb jimb 4096 Sep 22 21:09 ..
+drwxrwxr-x.  6 jimb jimb 4096 Sep 22 21:09 .git
+-rw-rw-r--.  1 jimb jimb    7 Sep 22 21:09 .gitignore
+-rw-rw-r--.  1 jimb jimb   88 Sep 22 21:09 Cargo.toml
+drwxrwxr-x.  2 jimb jimb 4096 Sep 22 21:09 src
+
+The src subdirectory contains the actual Rust code:
+
+$ cd src
+$ ls -l
+total 4
+-rw-rw-r--. 1 jimb jimb 45 Sep 22 21:09 main.rs
+
+fn main() {
+    println!("Hello, world!");
+}
+
+We can invoke the cargo run command from any directory in the package to build and run our program:
+$ cargo run
+   Compiling hello v0.1.0 (/home/jimb/rust/hello)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.28s
+     Running `/home/jimb/rust/hello/target/debug/hello`
+Hello, world!
+
+Here, Cargo has invoked the Rust compiler, rustc, and then run the executable it produced. Cargo places the executable in the target subdirectory at the top of the package:
+$ ls -l ../target/debug
+total 580
+drwxrwxr-x. 2 jimb jimb   4096 Sep 22 21:37 build
+drwxrwxr-x. 2 jimb jimb   4096 Sep 22 21:37 deps
+drwxrwxr-x. 2 jimb jimb   4096 Sep 22 21:37 examples
+-rwxrwxr-x. 1 jimb jimb 576632 Sep 22 21:37 hello
+-rw-rw-r--. 1 jimb jimb    198 Sep 22 21:37 hello.d
+drwxrwxr-x. 2 jimb jimb     68 Sep 22 21:37 incremental
+$ ../target/debug/hello
+Hello, world!
+
+When we’re through, Cargo can clean up the generated files for us:
+$ cargo clean
+$ ../target/debug/hello
+bash: ../target/debug/hello: No such file or directory
