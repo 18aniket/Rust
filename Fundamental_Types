@@ -10,4 +10,4 @@ Size (bits)	Unsigned integer	Signed integer	Floating-point
   128	            u128	            i128	 
 Machine word	    usize	            isize	 
 
-Here, a machine word is a value the size of an address on the machine the code runs on, 32 or 64 bits.
+Here, a machine word is a value the size of an address on the machine the code runs on, 32 or 64 bits
