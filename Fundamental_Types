@@ -37,3 +37,27 @@ For the purposes of type inference, Rust treats integer literals and floating-po
 
 The bool type
 -------------
+Rust, however, is very strict: control structures like if and while require their conditions to be bool expressions, as do the short-circuiting logical operators && and ||. You must write if x != 0 { ... }, not simply if x { ... }.
+
+Rust’s as operator can convert bool values to integer types:
+
+assert_eq!(false as i32, 0);
+assert_eq!(true  as i32, 1);
+
+However, as won’t convert in the other direction, from numeric types to bool. Instead, you must write out an explicit comparison like x != 0.
+
+Although a bool needs only a single bit to represent it, Rust uses an entire byte for a bool value in memory, so you can create a pointer to it.
+
+Characters
+----------
+Rust’s character type char represents a single Unicode character, as a 32-bit value.
+
+Rust uses the char type for single characters in isolation, but uses the UTF-8 encoding for strings and streams of text. So, a String represents its text as a sequence of UTF-8 bytes, not as an array of characters.
+
+Character literals are characters enclosed in single quotes, like '8' or '!'. You can use the full breadth of Unicode: '錆' is a char literal representing the Japanese kanji for sabi (rust).
+
+Tuples
+------
+A tuple is a pair, or triple, quadruple, quintuple, etc. (hence, n-tuple, or tuple), of values of assorted types. You can write a tuple as a sequence of elements, separated by commas and surrounded by parentheses. For example, ("Brazil", 1985) is a tuple whose first element is a statically allocated string, and whose second is an integer; its type is (&str, i32). Given a tuple value t, you can access its elements as t.0, t.1, and so on.
+
+For one thing, each element of a tuple can have a different type, whereas an array’s elements must be all the same type. Further, tuples allow only constants as indices, like t.4. You can’t write t.i or t[i] to get the ith element.
