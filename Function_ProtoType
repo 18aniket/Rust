@@ -23,3 +23,24 @@ In practice, most variables don’t get assigned to; the mut keyword on those th
 
 The function’s body starts with a call to the assert! macro, verifying that neither argument is zero.
 The ! character marks this as a macro invocation, not a function call.
+
+Like the assert macro in C and C++, Rust’s assert! checks that its argument is true, 
+and if it is not, terminates the program with a helpful message including the source location of the failing check; this kind of abrupt termination is called a panic. 
+
+Unlike C and C++, in which assertions can be skipped, Rust always checks assertions regardless of how the program was compiled. There is also a debug_assert! macro, 
+whose assertions are skipped when the program is compiled for speed.
+
+The heart of our function is a while loop containing an if statement and an assignment. 
+Unlike C and C++, Rust does not require parentheses around the conditional expressions, but it does require curly braces around the statements they control.
+
+A let statement declares a local variable, like t in our function. We don’t need to write out t’s type, as long as Rust can infer it from how the variable is used. 
+In our function, the only type that works for t is u64, matching m and n. 
+
+If we wanted to spell out t’s type, we could write:
+
+let t: u64 = m;
+
+Rust has a return statement, but the gcd function doesn’t need one. If a function body ends with an expression that is not followed by a semicolon, that’s the function’s return value.
+Use return statements only for explicit early returns from the midst of a function.
+
+TODO:- Unit Test and Command Line Arguments.
