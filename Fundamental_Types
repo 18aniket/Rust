@@ -11,3 +11,6 @@ Size (bits)	Unsigned integer	Signed integer	Floating-point
 Machine word	    usize	            isize	 
 
 Here, a machine word is a value the size of an address on the machine the code runs on, 32 or 64 bits
+
+Rust uses the u8 type for byte values. For example, reading data from a binary file or socket yields a stream of u8 values.
+Unlike C and C++, Rust treats characters as distinct from the numeric types: a char is not a u8, nor is it a u32 (though it is 32 bits long). 
