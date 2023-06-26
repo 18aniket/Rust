@@ -72,3 +72,12 @@ let head = temp.0;
 let tail = temp.1;
 assert_eq!(head, "I see the eigenvalue ");
 assert_eq!(tail, "in thine eye");
+
+The other commonly used tuple type is the zero-tuple ().
+This is traditionally called the unit type because it has only one value, also written (). Rust uses the unit type where there’s no meaningful value to carry,
+but context requires some sort of type nonetheless.
+
+For example, a function that returns no value has a return type of ().
+The declaration for std::mem::swap reads:
+
+fn swap<T>(x: &mut T, y: &mut T);
