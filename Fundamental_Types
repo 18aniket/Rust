@@ -85,3 +85,17 @@ fn swap<T>(x: &mut T, y: &mut T);
 If you like, you may include a comma after a tuple’s last element: the types (&str, i32,) and (&str, i32) are equivalent, as are the expressions ("Brazil", 1985,) and ("Brazil", 1985). 
 For consistency’s sake, there are even tuples that contain a single value. The literal ("lonely hearts",) is a tuple containing a single string; its type is (&str,).
 Here, the comma after the value is necessary to distinguish the singleton tuple from a simple parenthetic expression.
+
+Pointer Types
+-------------
+Rust has several types that represent memory addresses.
+
+The language is designed to help keep allocations to a minimum. Values nest by default. The value ((0, 0), (1440, 900)) is stored as four adjacent integers. If you store it in a local variable, you’ve got a local variable four integers wide. Nothing is allocated in the heap.
+
+This is great for memory efficiency, but as a consequence, when a Rust program needs values to point to other values, it must use pointer types explicitly. The good news is that the pointer types used in safe Rust are constrained to eliminate undefined behavior, so pointers are much easier to use correctly in Rust than in C++.
+
+We’ll discuss three pointer types here: references, boxes, and unsafe pointers.
+
+References :-A value of type &String (pronounced “ref String”) is a reference to a String value, a &i32 is a reference to an i32, and so on.
+            It’s easiest to get started by thinking of references as Rust’s basic pointer type. At run time, a reference to an i32 is a single machine word holding the address of the i32, which may be on the stack or in the heap.
+The expression &x produces a reference to x; in Rust terminology, we say that it borrows a reference to x. Given a reference r, the expression *r refers to the value r points to. 
