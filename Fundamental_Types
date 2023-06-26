@@ -14,3 +14,11 @@ Here, a machine word is a value the size of an address on the machine the code r
 
 Rust uses the u8 type for byte values. For example, reading data from a binary file or socket yields a stream of u8 values.
 Unlike C and C++, Rust treats characters as distinct from the numeric types: a char is not a u8, nor is it a u32 (though it is 32 bits long). 
+
+The usize and isize types are analogous to size_t and ptrdiff_t in C and C++.
+Rust requires array indices to be usize values. Values representing the sizes of arrays or vectors or counts of the number of elements in some data structure also generally have the usize type.\
+
+Integer literals in Rust can take a suffix indicating their type: 42u8 is a u8 value, and 1729isize is an isize. If an integer literal lacks a type suffix, 
+Rust puts off determining its type until it finds the value being used in a way that pins it down: stored in a variable of a particular type, passed to a function that expects a particular type, 
+compared with another value of a particular type, or something like that.
+In the end, if multiple types could work, Rust defaults to i32 if that is among the possibilities. Otherwise, Rust reports the ambiguity as an error.
