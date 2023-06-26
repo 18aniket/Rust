@@ -1,1 +1,13 @@
+Fixed-width numeric types can overflow or lose precision, but they are adequate for most applications and can be thousands of times faster than representations like arbitrary-precision integers and exact rationals.
+If you need those sorts of numeric representations, they are supported in the "num" crate.
 
+
+Size (bits)	Unsigned integer	Signed integer	Floating-point
+  8	              u8	              i8	 
+  16	            u16	              i16	 
+  32	            u32	              i32	        f32
+  64	            u64	              i64	        f64
+  128	            u128	            i128	 
+Machine word	    usize	            isize	 
+
+Here, a machine word is a value the size of an address on the machine the code runs on, 32 or 64 bits.
