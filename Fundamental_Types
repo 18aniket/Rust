@@ -61,3 +61,14 @@ Tuples
 A tuple is a pair, or triple, quadruple, quintuple, etc. (hence, n-tuple, or tuple), of values of assorted types. You can write a tuple as a sequence of elements, separated by commas and surrounded by parentheses. For example, ("Brazil", 1985) is a tuple whose first element is a statically allocated string, and whose second is an integer; its type is (&str, i32). Given a tuple value t, you can access its elements as t.0, t.1, and so on.
 
 For one thing, each element of a tuple can have a different type, whereas an array’s elements must be all the same type. Further, tuples allow only constants as indices, like t.4. You can’t write t.i or t[i] to get the ith element.
+
+Rust code often uses tuple types to return multiple values from a function. For example, the split_at method on string slices, which divides a string into two halves and returns them both, is declared like this:
+
+fn split_at(&self, mid: usize) -> (&str, &str);
+
+let text = "I see the eigenvalue in thine eye";
+let temp = text.split_at(21);
+let head = temp.0;
+let tail = temp.1;
+assert_eq!(head, "I see the eigenvalue ");
+assert_eq!(tail, "in thine eye");
