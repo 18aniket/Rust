@@ -96,7 +96,7 @@ This is great for memory efficiency, but as a consequence, when a Rust program n
 
 We’ll discuss three pointer types here: references, boxes, and unsafe pointers.
 
-References :-A value of type &String (pronounced “ref String”) is a reference to a String value, a &i32 is a reference to an i32, and so on.
+*References :-A value of type &String (pronounced “ref String”) is a reference to a String value, a &i32 is a reference to an i32, and so on.
             It’s easiest to get started by thinking of references as Rust’s basic pointer type. At run time, a reference to an i32 is a single machine word holding the address of the i32, which may be on the stack or in the heap.
 The expression &x produces a reference to x; in Rust terminology, we say that it borrows a reference to x. Given a reference r, the expression *r refers to the value r points to. 
 These are very much like the & and * operators in C and C++. And like a C pointer, a reference does not automatically free any resources when it goes out of scope.
@@ -108,3 +108,18 @@ An immutable, shared reference. You can have many shared references to a given v
 
 &mut T:-
 A mutable, exclusive reference. You can read and modify the value it points to, as with a T* in C. But for as long as the reference exists, you may not have any other references of any kind to that value. In fact, the only way you may access the value at all is through the mutable reference.
+
+*Boxes:-
+The simplest way to allocate a value in the heap is to use Box::new:
+
+let t = (12, "eggs");
+let b = Box::new(t);  // allocate a tuple in the heap
+
+The type of t is (i32, &str), so the type of b is Box<(i32, &str)>. The call to Box::new allocates enough memory to contain the tuple on the heap.
+When b goes out of scope, the memory is freed immediately, unless b has been moved—by returning it, for example.
+
+*Raw Pointers:-
+Rust also has the raw pointer types *mut T and *const T. Raw pointers really are just like pointers in C++.
+All the classic pointer mistakes of C++ are offered for your enjoyment.
+
+However, you may only dereference raw pointers within an unsafe block. An unsafe block is Rust’s opt-in mechanism for advanced language features whose safety is up to you. If your code has no unsafe blocks (or if those it does are written correctly), then the safety guarantees we emphasize throughout this book still hold. 
