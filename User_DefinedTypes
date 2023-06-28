@@ -28,3 +28,8 @@ let taxonomy = ["Animalia", "Arthropoda", "Insecta"];
 assert_eq!(lazy_caterer[3], 7);
 assert_eq!(taxonomy.len(), 3);
 
+For the common case of a long array filled with some value, you can write [V; N], where V is the value each element should have, and N is the length. For example, [true; 10000] is an array of 10,000 bool elements, all set to true.
+
+let mut sieve = [true; 10000];
+
+You’ll see this syntax used for fixed-size buffers: [0u8; 1024] can be a one-kilobyte buffer, filled with zeros. Rust has no notation for an uninitialized array. (In general, Rust ensures that code can never access any sort of uninitialized value.)
