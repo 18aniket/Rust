@@ -13,3 +13,18 @@ The types &[T] and &mut [T], called a shared slice of Ts and mutable slice of Ts
 You can think of a slice as a pointer to its first element, together with a count of the number of elements you can access starting at that point. 
 A mutable slice &mut [T] lets you read and modify elements, but can’t be shared; a shared slice &[T] lets you share access among several readers, but doesn’t let you modify elements.
 
+Given a value v of any of these three types, the expression v.len() gives the number of elements in v, and v[i] refers to the ith element of v. 
+The first element is v[0], and the last element is v[v.len() - 1].
+Rust checks that i always falls within this range; if it doesn’t, the expression panics.
+The length of v may be zero, in which case any attempt to index it will panic. i must be a usize value; you can’t use any other integer type as an index.
+
+
+*Arrays
+There are several ways to write array values. The simplest is to write a series of values within square brackets:
+
+let lazy_caterer: [u32; 6] = [1, 2, 4, 7, 11, 16];
+let taxonomy = ["Animalia", "Arthropoda", "Insecta"];
+
+assert_eq!(lazy_caterer[3], 7);
+assert_eq!(taxonomy.len(), 3);
+
