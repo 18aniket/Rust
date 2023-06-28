@@ -103,3 +103,8 @@ These are very much like the & and * operators in C and C++. And like a C pointe
 
 Unlike C pointers, however, Rust references are never null: there is simply no way to produce a null reference in safe Rust. And unlike C, Rust tracks the ownership and lifetimes of values, so mistakes like dangling pointers, double frees, and pointer invalidation are ruled out at compile time.
 
+&T:-
+An immutable, shared reference. You can have many shared references to a given value at a time, but they are read-only: modifying the value they point to is forbidden, as with const T* in C.
+
+&mut T:-
+A mutable, exclusive reference. You can read and modify the value it points to, as with a T* in C. But for as long as the reference exists, you may not have any other references of any kind to that value. In fact, the only way you may access the value at all is through the mutable reference.
