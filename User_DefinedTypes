@@ -35,5 +35,40 @@ let mut sieve = [true; 10000];
 You’ll see this syntax used for fixed-size buffers: [0u8; 1024] can be a one-kilobyte buffer, filled with zeros. Rust has no notation for an uninitialized array. 
 (In general, Rust ensures that code can never access any sort of uninitialized value.)
 
-An array’s length is part of its type and fixed at compile time. If n is a variable, you can’t write [true; n] to get an array of n elements. 
+An array’s length is part of its type and fixed at compile time. If n is a variable, you can’t write [true; n] to get an array of n elements.
 When you need an array whose length varies at run time (and you usually do), use a vector instead.
+
+*Vectors
+A vector Vec<T> is a resizable array of elements of type T, allocated on the heap.
+There are several ways to create vectors. The simplest is to use the vec! macro, which gives us a syntax for vectors that looks very much like an array literal:
+
+let mut primes = vec![2, 3, 5, 7];
+assert_eq!(primes.iter().product::<i32>(), 210);
+
+primes.push(11);
+primes.push(13);
+assert_eq!(primes.iter().product::<i32>(), 30030);
+
+You can also build a vector by repeating a given value a certain number of times, again using a syntax that imitates array literals:
+
+fn new_pixel_buffer(rows: usize, cols: usize) -> Vec<u8> {
+    vec![0; rows * cols]
+}
+
+The vec! macro is equivalent to calling Vec::new to create a new, empty vector and then pushing the elements onto it, which is another idiom:
+let mut pal = Vec::new();
+pal.push("step");
+pal.push("on");
+pal.push("no");
+pal.push("pets");
+assert_eq!(pal, vec!["step", "on", "no", "pets"])
+
+Another possibility is to build a vector from the values produced by an iterator:
+
+let v: Vec<i32> = (0..5).collect();
+assert_eq!(v, [0, 1, 2, 3, 4]);
+You’ll often need to supply the type when using collect (as we’ve done here), because it can build many different sorts of collections, not just vectors.
+
+Vec is an essential type to Rust—it’s used almost anywhere one needs a list of dynamic size.
+
+
