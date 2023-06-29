@@ -84,3 +84,21 @@ Hacks for Vector:-
 
 If you know the number of elements a vector will need in advance, instead of Vec::new you can call Vec::with_capacity to create a vector with a buffer large enough to hold them all, 
 right from the start; then, you can add the elements to the vector one at a time without causing any reallocation.
+
+Just as a vector’s len method returns the number of elements it contains now, its capacity method returns the number of elements it could hold without reallocation:
+
+let mut v = Vec::with_capacity(2);
+assert_eq!(v.len(), 0);
+assert_eq!(v.capacity(), 2);
+
+v.push(1);
+v.push(2);
+assert_eq!(v.len(), 2);
+assert_eq!(v.capacity(), 2);
+
+v.push(3);
+assert_eq!(v.len(), 3);
+// Typically prints "capacity is now 4":
+println!("capacity is now {}", v.capacity());
+
+The capacity printed at the end isn’t guaranteed to be exactly 4, but it will be at least 3, since the vector is holding three values.
