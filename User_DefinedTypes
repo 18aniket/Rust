@@ -102,3 +102,5 @@ assert_eq!(v.len(), 3);
 println!("capacity is now {}", v.capacity());
 
 The capacity printed at the end isn’t guaranteed to be exactly 4, but it will be at least 3, since the vector is holding three values.
+
+*Slices----TODO -- Need more time to understand...till progressing on other things.
