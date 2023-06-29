@@ -32,4 +32,8 @@ For the common case of a long array filled with some value, you can write [V; N]
 
 let mut sieve = [true; 10000];
 
-You’ll see this syntax used for fixed-size buffers: [0u8; 1024] can be a one-kilobyte buffer, filled with zeros. Rust has no notation for an uninitialized array. (In general, Rust ensures that code can never access any sort of uninitialized value.)
+You’ll see this syntax used for fixed-size buffers: [0u8; 1024] can be a one-kilobyte buffer, filled with zeros. Rust has no notation for an uninitialized array. 
+(In general, Rust ensures that code can never access any sort of uninitialized value.)
+
+An array’s length is part of its type and fixed at compile time. If n is a variable, you can’t write [true; n] to get an array of n elements. 
+When you need an array whose length varies at run time (and you usually do), use a vector instead.
