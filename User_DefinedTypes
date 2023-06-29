@@ -78,3 +78,9 @@ A Vec<T> consists of three values:
 2. the number of elements that buffer has the capacity to store; 
 3. and the number it actually contains now (in other words, its length). 
 When the buffer has reached its capacity, adding another element to the vector entails allocating a larger buffer, copying the present contents into it, updating the vector’s pointer and capacity to describe the new buffer, and finally freeing the old one.
+
+Hacks for Vector:-
+------------------
+
+If you know the number of elements a vector will need in advance, instead of Vec::new you can call Vec::with_capacity to create a vector with a buffer large enough to hold them all, 
+right from the start; then, you can add the elements to the vector one at a time without causing any reallocation.
