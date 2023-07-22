@@ -97,6 +97,21 @@ and track that information until the vector is dropped. In the most general case
 vectors would need to carry around extra information with them to indicate which elements are live and which have become uninitialized. 
 That is clearly not the right behavior for a systems programming language.
 
+Collection types like Vec also generally offer methods to consume all their elements in a loop.
+
+let v = vec!["liberté".to_string(),
+             "égalité".to_string(),
+             "fraternité".to_string()];
+
+for mut s in v {
+    s.push('!');
+    println!("{}", s);
+}
+
+When we pass the vector to the loop directly, as in for ... in v, this moves the vector out of v, leaving v uninitialized. 
+The for loop’s internal machinery takes ownership of the vector and dissects it into its elements. 
+At each iteration, the loop moves another element to the variable s. Since s now owns the string, we’re able to modify it in the loop body before printing it. 
+And since the vector itself is no longer visible to the code, nothing can observe it mid-loop in some partially emptied state.
 
 
 
