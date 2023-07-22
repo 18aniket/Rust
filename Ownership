@@ -166,7 +166,7 @@ You could write the preceding manipulation more legibly as follows:
 let first_name = composers[0].name.take();
 This call to take has the same effect as the earlier call to replace.
 
-Copy Types: The Exception to Moves
+Copy Types: The Exception to Moves(V IMP ***)
 ----------------------------------
 Compare what happens in memory when we assign a String with what happens when we assign an i32 value:
 
@@ -175,5 +175,61 @@ let string2 = string1;
 
 let num1: i32 = 36;
 let num2 = num1;
+
+As with the vectors earlier, assignment moves string1 to string2 so that we don’t end up with two strings responsible for freeing the same buffer. 
+However, the situation with num1 and num2 is different. An i32 is simply a pattern of bits in memory; it doesn’t own any heap resources or really depend on anything other than the bytes it comprises. 
+By the time we’ve moved its bits to num2, we’ve made a completely independent copy of num1.
+
+Earlier we were careful to say that most types are moved; now we’ve come to the exceptions, the types Rust designates as Copy types. Assigning a value of a Copy type copies the value, rather than moving it. 
+The source of the assignment remains initialized and usable, with the same value it had before. 
+Passing Copy types to functions and constructors behaves similarly.
+
+The standard Copy types include all the machine integer and floating-point numeric types, the char and bool types, and a few others. 
+A tuple or fixed-size array of Copy types is itself a Copy type.
+
+Only types for which a simple bit-for-bit copy suffices can be Copy. 
+As we’ve already explained, String is not a Copy type, because it owns a heap-allocated buffer.
+
+As a rule of thumb, any type that needs to do something special when a value is dropped cannot be Copy: a Vec needs to free its elements, a File needs to close its file handle, a MutexGuard needs to unlock its mutex, and so on. 
+Bit-for-bit duplication of such types would leave it unclear which value was now responsible for the original’s resources.
+
+
+What about types you define yourself? By default, struct and enum types are not Copy:
+struct Label { number: u32 }
+
+fn print(l: Label) { println!("STAMP: {}", l.number); }
+
+let l = Label { number: 3 };
+print(l);
+println!("My label number is: {}", l.number);
+
+This won’t compile; Rust complains:
+
+error: borrow of moved value: `l`
+   |
+10 |     let l = Label { number: 3 };
+   |         - move occurs because `l` has type `main::Label`,
+   |           which does not implement the `Copy` trait
+11 |     print(l);
+   |           - value moved here
+12 |     println!("My label number is: {}", l.number);
+   |                                        ^^^^^^^^
+   |                  value borrowed here after move
+
+But user-defined types being non-Copy is only the default. 
+If all the fields of your struct are themselves Copy, 
+then you can make the type Copy as well by placing the attribute #[derive(Copy, Clone)] above the definition, like so:
+
+#[derive(Copy, Clone)]
+struct Label { number: u32 }
+
+With this change, the preceding code compiles without complaint. However, if we try this on a type whose fields are not all Copy, it doesn’t work. Suppose we compile the following code:
+
+#[derive(Copy, Clone)]
+struct StringLabel { name: String }
+
+
+
+
 
 
