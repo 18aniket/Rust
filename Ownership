@@ -53,3 +53,53 @@ the value proper is the three-word header alone; the potentially large element a
 Second, the Rust compiler’s code generation is good at “seeing through” all these moves; in practice, the machine code often stores the value directly where it belongs.
 
 
+Moves and Control Flow:-(To be must known)
+==========================================
+
+let x = vec![10, 20, 30];
+if c {
+    f(x); // ... ok to move from x here
+} else {
+    g(x); // ... and ok to also move from x here
+}
+h(x); // bad: x is uninitialized here if either path uses it.
+
+
+let x = vec![10, 20, 30];
+while f() {
+    g(x); // bad: x would be moved in first iteration,
+          // uninitialized in second
+}
+
+
+let mut x = vec![10, 20, 30];
+while f() {
+    g(x);           // move from x
+    x = h();        // give x a fresh value
+}
+e(x);
+
+
+Moves and Indexed Content:-
+===========================
+// Build a vector of the strings "101", "102", ... "105"
+let mut v = Vec::new();
+for i in 101 .. 106 {
+    v.push(i.to_string());
+}
+
+// Pull out random elements from the vector.
+let third = v[2]; // error: Cannot move out of index of Vec
+let fifth = v[4]; // here too
+
+For this to work, Rust would somehow need to remember that the third and fifth elements of the vector have become uninitialized, 
+and track that information until the vector is dropped. In the most general case, 
+vectors would need to carry around extra information with them to indicate which elements are live and which have become uninitialized. 
+That is clearly not the right behavior for a systems programming language.
+
+
+
+
+
+
+
