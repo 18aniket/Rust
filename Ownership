@@ -5,3 +5,45 @@ Very simple types like integers, floating-point numbers, and characters are excu
 The standard library provides the reference-counted pointer types Rc and Arc, which allow values to have multiple owners, under some restrictions.
 
 You can “borrow a reference” to a value; references are non-owning pointers, with limited lifetimes.
+
+Example:-
+Python Code:-
+s = ['udon', 'ramen', 'soba']
+t = s
+u = s
+
+Rust Code:-
+let s = vec!["udon".to_string(), "ramen".to_string(), "soba".to_string()];
+let t = s;
+let u = s;
+
+Like C and C++, Rust puts plain string literals like "udon" in read-only memory, 
+so for a clearer comparison with the C++ and Python examples, we call to_string here to get heap-allocated String values.
+
+what happens when we reach the initialization let u = s;? This would assign the uninitialized value s to u. Rust prudently prohibits using uninitialized values.
+Still wants to do:-
+The price you pay is that you must explicitly ask for copies when you want them. 
+If you want to end up in the same state as the C++ program, with each variable holding an independent copy of the structure, you must call the vector’s clone method, which performs a deep copy of the vector and its elements:
+
+let s = vec!["udon".to_string(), "ramen".to_string(), "soba".to_string()];
+let t = s.clone();
+let u = s.clone();
+
+More Operations That Move
+=========================
+
+let mut s = "Govinda".to_string();
+s = "Siddhartha".to_string(); // value "Govinda" dropped here
+
+let mut s = "Govinda".to_string();
+let t = s;
+s = "Siddhartha".to_string(); // nothing is dropped here
+
+Summary:-
+We’ve used initializations and assignments in the examples here because they’re simple, 
+but Rust applies move semantics to almost any use of a value. 
+Passing arguments to functions moves ownership to the function’s parameters; 
+returning a value from a function moves ownership to the caller. Building a tuple moves the values into the tuple. And so on.
+
+
+
