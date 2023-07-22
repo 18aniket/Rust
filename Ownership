@@ -40,10 +40,16 @@ let t = s;
 s = "Siddhartha".to_string(); // nothing is dropped here
 
 Summary:-
+---------
 We’ve used initializations and assignments in the examples here because they’re simple, 
 but Rust applies move semantics to almost any use of a value. 
 Passing arguments to functions moves ownership to the function’s parameters; 
 returning a value from a function moves ownership to the caller. Building a tuple moves the values into the tuple. And so on.
 
+More than the Summary:-
+-------------------------
+Moving values around like this may sound inefficient, but there are two things to keep in mind. First, the moves always apply to the value proper, not the heap storage they own. For vectors and strings, 
+the value proper is the three-word header alone; the potentially large element arrays and text buffers sit where they are in the heap. 
+Second, the Rust compiler’s code generation is good at “seeing through” all these moves; in practice, the machine code often stores the value directly where it belongs.
 
 
