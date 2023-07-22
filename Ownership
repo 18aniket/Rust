@@ -140,6 +140,28 @@ And since the vector itself is no longer visible to the code, nothing can observ
 
 
 
+If you do find yourself needing to move a value out of an owner that the compiler can’t track, you might consider changing the owner’s type to something that can dynamically track whether it has a value or not. 
+For example, here’s a variant on the earlier example:
 
+struct Person { name: Option<String>, birth: i32 }
 
+let mut composers = Vec::new();
+composers.push(Person { name: Some("Palestrina".to_string()),
+                        birth: 1525 });
 
+You can’t do this:
+
+let first_name = composers[0].name;
+
+That will just elicit the same “cannot move out of index” error shown earlier. But because you’ve changed the type of the name field from String to Option<String>, 
+that means that None is a legitimate value for the field to hold, so this works:
+
+let first_name = std::mem::replace(&mut composers[0].name, None);
+assert_eq!(first_name, Some("Palestrina".to_string()));
+assert_eq!(composers[0].name, None);
+
+The replace call moves out the value of composers[0].name, leaving None in its place, and passes ownership of the original value to its caller. In fact, using Option this way is common enough that the type provides a take method for this very purpose. 
+You could write the preceding manipulation more legibly as follows:
+
+let first_name = composers[0].name.take();
+This call to take has the same effect as the earlier call to replace.
