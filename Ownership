@@ -1,1 +1,7 @@
--
+You  can  move  values  from  one  owner  to  another. This allows you to  build,  rearrange, and tear down the tree.
+
+Very simple types like integers, floating-point numbers, and characters are excused from the ownership rules. These are called Copy types.
+
+The standard library provides the reference-counted pointer types Rc and Arc, which allow values to have multiple owners, under some restrictions.
+
+You can “borrow a reference” to a value; references are non-owning pointers, with limited lifetimes.
