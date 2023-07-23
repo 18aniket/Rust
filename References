@@ -81,6 +81,22 @@ fn show(table: &Table) {
     }
 }
 
+The type of show’s parameter table has changed from Table to &Table: instead of passing the table by value (and hence moving ownership into the function), we’re now passing a shared reference. That’s the only textual change. But how does this play out as we work through the body?
+
+Whereas our original outer for loop took ownership of the HashMap and consumed it, in our new version it receives a shared reference to the HashMap. Iterating over a shared reference to a HashMap is defined to produce shared references to each entry’s key and value: artist has changed from a String to a &String, and works from a Vec<String> to a &Vec<String>.
+
+The inner loop is changed similarly. Iterating over a shared reference to a vector is defined to produce shared references to its elements, so work is now a &String. No ownership changes hands anywhere in this function; it’s just passing around non-owning references.
+
+Now, if we wanted to write a function to alphabetize the works of each artist, a shared reference doesn’t suffice, since shared references don’t permit modification. Instead, the sorting function needs to take a mutable reference to the table:
+
+fn sort_works(table: &mut Table) {
+    for (_artist, works) in table {
+        works.sort();
+    }
+}
+And we need to pass it one:
+
+sort_works(&mut table);
 
 
 
