@@ -98,6 +98,25 @@ And we need to pass it one:
 
 sort_works(&mut table);
 
+Working with References
+=======================
+The preceding example shows a pretty typical use for references: allowing functions to access or manipulate a structure without taking ownership.
+
+In C++, references are created implicitly by conversion, and dereferenced implicitly too:
+
+// C++ code!
+int x = 10;
+int &r = x;             // initialization creates reference implicitly
+assert(r == 10);        // implicitly dereference r to see x's value
+r = 20;        
+
+In Rust, references are created explicitly with the & operator, and dereferenced explicitly with the * operator:
+
+// Back to Rust code from this point onward.
+let x = 10;
+let r = &x;             // &x is a shared reference to x
+assert!(*r == 10);      // explicitly dereference r
+
 
 
 
