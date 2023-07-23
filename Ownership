@@ -228,8 +228,18 @@ With this change, the preceding code compiles without complaint. However, if we 
 #[derive(Copy, Clone)]
 struct StringLabel { name: String }
 
+Rc and Arc: Shared Ownership
+----------------------------
+Although most values have unique owners in typical Rust code, in some cases it’s difficult to find every value a single owner that has the lifetime you need; you’d like the value to simply live until everyone’s done using it. For these cases, Rust provides the reference-counted pointer types Rc and Arc.
 
+The Rc and Arc types are very similar; the only difference between them is that an Arc is safe to share between threads directly—the name Arc is short for atomic reference count—whereas a plain Rc uses faster non-thread-safe code to update its reference count.
 
+use std::rc::Rc;
+
+// Rust can infer all these types; written out for clarity
+let s: Rc<String> = Rc::new("shirataki".to_string());
+let t: Rc<String> = s.clone();
+let u: Rc<String> = s.clone();
 
 
 
