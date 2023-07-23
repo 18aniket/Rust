@@ -1,1 +1,63 @@
+References to Values
+====================
+As an example, let’s suppose we’re going to build a table of murderous Renaissance artists and the works they’re known for.
+
+use std::collections::HashMap;
+
+type Table = HashMap<String, Vec<String>>;
+
+
+fn show(table: Table) {
+    for (artist, works) in table {
+        println!("works by {}:", artist);
+        for work in works {
+            println!("  {}", work);
+        }
+    }
+}
+
+Constructing and printing the table is straightforward:
+
+fn main() {
+    let mut table = Table::new();
+    table.insert("Gesualdo".to_string(),
+                 vec!["many madrigals".to_string(),
+                      "Tenebrae Responsoria".to_string()]);
+    table.insert("Caravaggio".to_string(),
+                 vec!["The Musicians".to_string(),
+                      "The Calling of St. Matthew".to_string()]);
+    table.insert("Cellini".to_string(),
+                 vec!["Perseus with the head of Medusa".to_string(),
+                      "a salt cellar".to_string()]);
+
+    show(table);
+}
+
+But if you’ve read the previous chapter’s section on moves, this definition for show should raise a few questions. In particular, HashMap is not Copy—it can’t be, since it owns a dynamically allocated table. So when the program calls show(table), the whole structure gets moved to the function, leaving the variable table uninitialized.
+
+If the calling code tries to use table now, it’ll run into trouble:
+
+...
+show(table);
+assert_eq!(table["Gesualdo"][0], "many madrigals");
+Rust complains that table isn’t available anymore:
+
+error: borrow of moved value: `table`
+   |
+20 |     let mut table = Table::new();
+   |         --------- move occurs because `table` has type 
+   |                   `HashMap<String, Vec<String>>`,
+   |                   which does not implement the `Copy` trait
+...
+31 |     show(table);
+   |          ----- value moved here
+32 |     assert_eq!(table["Gesualdo"][0], "many madrigals");
+   |                ^^^^^ value borrowed here after move
+
+we’ve completely destroyed the entire structure simply by trying to print it out. Thanks, Rust!
+
+
+
+
+
 
