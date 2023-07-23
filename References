@@ -56,6 +56,32 @@ error: borrow of moved value: `table`
 
 we’ve completely destroyed the entire structure simply by trying to print it out. Thanks, Rust!
 
+The right way to handle this is to use references. A reference lets you access a value without affecting its ownership. References come in two kinds
+
+A shared reference lets you read but not modify its referent. However, you can have as many shared references to a particular value at a time as you like. The expression &e yields a shared reference to e’s value; if e has the type T, then &e has the type &T, pronounced “ref T.” Shared references are Copy.
+
+If you have a mutable reference to a value, you may both read and modify the value. However, you may not have any other references of any sort to that value active at the same time. The expression &mut e yields a mutable reference to e’s value; you write its type as &mut T, which is pronounced “ref mute T.” Mutable references are not Copy.
+
+You can think of the distinction between shared and mutable references as a way to enforce a multiple readers or single writer rule at compile time. In fact, this rule doesn’t apply only to references; it covers the borrowed value’s owner as well.
+
+ As long as there are shared references to a value, not even its owner can modify it; the value is locked down.
+
+The printing function in our example doesn’t need to modify the table, just read its contents. So the caller should be able to pass it a shared reference to the table, as follows:
+
+show(&table);
+
+References are non-owning pointers, so the table variable remains the owner of the entire structure; show has just borrowed it for a bit. Naturally, we’ll need to adjust the definition of show to match,
+
+fn show(table: &Table) {
+    for (artist, works) in table {
+        println!("works by {}:", artist);
+        for work in works {
+            println!("  {}", work);
+        }
+    }
+}
+
+
 
 
 
