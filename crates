@@ -101,5 +101,74 @@ A module can have its own directory. When Rust sees mod spores;,
 it checks for both spores.rs and spores/mod.rs; if neither file exists, or both exist, that’s an error. 
 
 
+In main.rs, we declare the plant_structures modules:-
 
+pub mod plant_structures;
+
+This causes Rust to load plant_structures/mod.rs, which declares the three sub modules:-
+pub mod roots;
+pub mod stems;
+pub mod leaves;
+
+Path And Imports:-
+------------------
+
+The :: operator is used to access feature of a module.Code anywhere in your project can refer to any standard library feature by
+writing out its path:
+
+if s1 > s2 {
+   std::mem::swap(&mut s1,&mut s2);
+}
+
+std is the name of the standard library.The path std refers to the top-level module of the standard library.std::mem is a submodule
+within the standard library, and std::mem::swap is the public fn of the module.
+
+use std::mem;
+if s1 > s2 {
+  mem::swap(&mut s1,&mut s2);
+}
+
+The use declaration causes the name mem to be a local alias for std::mem throughout the enclosing block or module.
+
+You can use as to import an item but give it a different name locally:
+use std::io::Result as IOResult;
+
+Modules do not automatically inherit names from their parent modules. For example, suppose we have this in our proteins/mod.rs
+// proteins/mod.rs
+pub enum AminoAcid { ... }
+pub mod synthesis;
+
+Then the code in synthesis.rs does not automatically see the type AminoAcid:
+// proteins/synthesis.rs
+pub fn synthesize(seq: &[AminoAcid])
+
+Instead, each module starts with a blank slate and must import the names it uses:
+
+// proteins/synthesis.rs
+use super::AminoAcid;  // explicitly import from parent
+
+pub fn synthesize(seq: &[AminoAcid])  // ok
+
+By default, paths are relative to the current module:
+// in proteins/mod.rs
+
+// import from a submodule
+use synthesis::synthesize;
+
+self is also a synonym for the current module, so we could write either:
+
+// in proteins/mod.rs
+
+// import names from an enum,
+// so we can write `Lys` for lysine, rather than `AminoAcid::Lys`
+use self::AminoAcid::*;
+
+or simply:
+
+// in proteins/mod.rs
+
+use AminoAcid::*;
+
+The keywords super and crate have a special meaning in paths: super refers to the parent module, 
+and crate refers to the crate containing the current module.
 
