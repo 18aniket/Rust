@@ -35,6 +35,10 @@ They act as Rust’s namespaces, containers for the functions, types, constants,
          Anything that isn’t marked pub is private 
          and can only be used in the same module in which it is defined, or any child modules.
          */
+         /*
+         pub(crate), meaning that it is available anywhere inside this crate, 
+         but isn’t exposed as part of the external interface.
+         */
      }
      
      
