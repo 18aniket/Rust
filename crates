@@ -194,3 +194,26 @@ To refer to your own module’s Sampler type, you can write:
 
 use self::image::Sampler;   // the `image` module's `Sampler.
 
+The Standard Prelude:
+---------------------
+
+//TODO.
+
+//-------------------
+
+Making Struct Fields pub:
+-------------------------
+A module can include user-defined struct types, introduced using the struct keyword.
+
+pub struct Fern {
+    pub roots: RootSet;
+    pub stems: StemSet;
+}
+
+A struct’s fields, even private fields, are accessible throughout the module where the struct is declared, and its submodules. 
+Outside the module, only public fields are accessible.
+
+It turns out that enforcing access control by module, rather than by class as in Java or C++, is surprisingly helpful for software design. 
+It cuts down on boilerplate “getter” and “setter” methods, and it largely eliminates the need for anything like C++ friend declarations.
+
+
