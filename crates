@@ -294,6 +294,37 @@ fn main() {
 Because we’ve put this file into src/bin, Cargo will compile both the fern_sim library and this program the next time we run cargo build. 
 We can run the efern program using cargo run --bin efern.
 We still didn’t have to make any changes to Cargo.toml, because, again, Cargo’s default is to look at your source files and figure things out. 
-It automatically treats .rs files in src/bin as extra programs to build
+It automatically treats .rs files in src/bin as extra programs to build.
 
+Attributes:
+-----------
+Any item in a Rust program can be decorated with attributes.
+Attributes are Rust’s catchall syntax for writing miscellaneous instructions and advice to the compiler.
+
+For example, suppose you’re getting this warning:
+
+libgit2.rs: warning: type `git_revspec` should have a camel case name
+    such as `GitRevspec`, #[warn(non_camel_case_types)] on by default.
+
+#[allow(non_camel_case_types)]
+pub struct git_revspec {
+    ...
+}
+// Only include this module in the project if we're building for Android.
+#[cfg(target_os = "android")]
+mod mobile;
+
+#[cfg(...)] 
+option	Enabled when
+test	Tests are enabled (compiling with cargo test or rustc --test).
+debug_assertions	Debug assertions are enabled (typically in nonoptimized builds).
+unix	Compiling for Unix, including macOS.
+windows	Compiling for Windows.
+target_pointer_width = "64"	Targeting a 64-bit platform. The other possible value is "32".
+target_arch = "x86_64"	Targeting x86-64 in particular. Other values: "x86", "arm", "aarch64", "powerpc", "powerpc64", "mips".
+target_os = "macos"	Compiling for macOS. Other values: "windows", "ios", "android", "linux", "freebsd", "openbsd", "netbsd", "dragonfly".
+feature = "robots"	The user-defined feature named "robots" is enabled (compiling with cargo build --feature robots or rustc --cfg feature='"robots"'). Features are declared in the [features] section of Cargo.toml.
+not(A)	A is not satisfied. To provide two different implementations of a function, mark one with #[cfg(X)] and the other with #[cfg(not(X))].
+all(A,B)	Both A and B are satisfied (the equivalent of &&).
+any(A,B)	Either A or B is satisfied (the equivalent of ||)
 
