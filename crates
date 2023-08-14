@@ -227,4 +227,12 @@ The static keyword introduces a static item, which is nearly the same thing:
 pub static ROOM_TEMPERATURE: f64 = 68.0;  // degrees Fahrenheit
 
 
+Turning a Program into a Library:
+---------------------------------
+The first step is to factor your existing project into two parts: a library crate, which contains all the shared code, 
+and an executable, which contains the code that’s only needed for your existing command-line program.
+
+
+
+
 
