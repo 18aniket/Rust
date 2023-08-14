@@ -216,4 +216,15 @@ Outside the module, only public fields are accessible.
 It turns out that enforcing access control by module, rather than by class as in Java or C++, is surprisingly helpful for software design. 
 It cuts down on boilerplate “getter” and “setter” methods, and it largely eliminates the need for anything like C++ friend declarations.
 
+Statics and Constants:
+----------------------
+The const keyword introduces a constant. The syntax is just like let except that it may be marked pub, 
+and the type is required. Also, UPPERCASE_NAMES are conventional for constants:
+
+pub const ROOM_TEMPERATURE: f64 = 20.0;  // degrees Celsius
+The static keyword introduces a static item, which is nearly the same thing:
+
+pub static ROOM_TEMPERATURE: f64 = 68.0;  // degrees Fahrenheit
+
+
 
