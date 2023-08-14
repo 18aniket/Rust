@@ -232,7 +232,66 @@ Turning a Program into a Library:
 The first step is to factor your existing project into two parts: a library crate, which contains all the shared code, 
 and an executable, which contains the code that’s only needed for your existing command-line program.
 
+//main.rs
 
+struct Fern {
+    size: f64,
+    growth_rate: f64
+}
 
+impl Fern {
+    /// Simulate a fern growing for one day.
+    fn grow(&mut self) {
+        self.size *= 1.0 + self.growth_rate;
+    }
+}
+
+/// Run a fern simulation for some number of days.
+fn run_simulation(fern: &mut Fern, days: usize) {
+    for _ in 0 .. days {
+        fern.grow();
+    }
+}
+
+fn main() {
+    let mut fern = Fern {
+        size: 1.0,
+        growth_rate: 0.001
+    };
+    run_simulation(&mut fern, 1000);
+    println!("final fern size: {}", fern.size);
+}
+
+We’ll assume that this program has a trivial Cargo.toml file:
+
+[package]
+name = "fern_sim"
+version = "0.1.0"
+authors = ["You <you@example.com>"]
+edition = "2021"
+
+Turning this program into a library is easy. Here are the steps:
+
+Rename the file src/main.rs to src/lib.rs.
+
+Add the pub keyword to items in src/lib.rs that will be public features of our library.
+
+Move the main function to a temporary file somewhere.
+
+We can keep our program and our library in the same crate, too. Put this code into a file named src/bin/efern.rs:
+
+use fern_sim::{Fern, run_simulation};
+
+fn main() {
+    let mut fern = Fern {
+        size: 1.0,
+        growth_rate: 0.001
+    };
+    run_simulation(&mut fern, 1000);
+    println!("final fern size: {}", fern.size);
+}
+
+Because we’ve put this file into src/bin, Cargo will compile both the fern_sim library and this program the next time we run cargo build. 
+We can run the efern program using cargo run --bin efern.
 
 
