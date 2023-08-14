@@ -1,1 +1,63 @@
+#[test]
+fn math_works() {
+    let x: i32 = 1;
+    assert!(x.is_positive());
+    assert_eq!(x + 1, 2);
+}
+
+This works the same whether your crate is an executable or a library. 
+You can run specific tests by passing arguments to Cargo: cargo test math runs all tests that contain math somewhere in their name.
+
+Tests commonly use the assert! and assert_eq! macros from the Rust standard library. assert!(expr) succeeds if expr is true. Otherwise, it panics, which causes the test to fail. 
+assert_eq!(v1, v2) is just like assert!(v1 == v2) except that if the assertion fails, the error message shows both values.
+
+You can use these macros in ordinary code, to check invariants, but note that assert! and assert_eq! are included even in release builds. 
+Use debug_assert! and debug_assert_eq! instead to write assertions that are checked only in debug builds.
+
+Functions marked with #[test] are compiled conditionally. 
+A plain cargo build or cargo build --release skips the testing code. But when you run cargo test, Cargo builds your program twice: 
+once in the ordinary way and once with your tests and the test harness enabled. 
+This means your unit tests can live right alongside the code they test, accessing internal implementation details if they need to, and yet there’s no run-time cost. 
+However, it can result in some warnings. For example:
+
+fn roughly_equal(a: f64, b: f64) -> bool {
+    (a - b).abs() < 1e-6
+}
+
+#[test]
+fn trig_works() {
+    use std::f64::consts::PI;
+    assert!(roughly_equal(PI.sin(), 0.0));
+}
+
+In builds that omit the test code, roughly_equal appears unused, and Rust will complain:
+
+$ cargo build
+   Compiling math_test v0.1.0 (file:///.../math_test)
+warning: function is never used: `roughly_equal`
+  |
+7 | / fn roughly_equal(a: f64, b: f64) -> bool {
+8 | |     (a - b).abs() < 1e-6
+9 | | }
+  | |_^
+  |
+   = note: #[warn(dead_code)] on by default
+
+Fix:-
+#[cfg(test)]   // include this module only when testing
+mod tests {
+    fn roughly_equal(a: f64, b: f64) -> bool {
+        (a - b).abs() < 1e-6
+    }
+    #[test]
+    fn trig_works() {
+        use std::f64::consts::PI;
+        assert!(roughly_equal(PI.sin(), 0.0));
+    }
+}
+
+Rust’s test harness uses multiple threads to run several tests at a time, 
+a nice side benefit of your Rust code being thread-safe by default. 
+To disable this, either run a single test, cargo test testname, or run cargo test -- --test-threads 1.
+
 
