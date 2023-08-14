@@ -1,3 +1,7 @@
 Once it has the source code, Cargo compiles all the crates. It runs rustc, the Rust compiler, once for each crate in the project’s dependency graph. When compiling libraries, Cargo uses the --crate-type lib option. This tells rustc not to look for a main() function but instead to produce an .rlib file containing compiled code that can be used to create binaries and other .rlib files.
 
 When compiling a program, Cargo uses --crate-type bin, and the result is a binary executable for the target platform.
+
+With each rustc command, Cargo passes --extern options, giving the filename of each library the crate will use. That way, when rustc sees a line of code like use image::png::PNGEncoder, it can figure out that image is the name of another crate, and thanks to Cargo, it knows where to find that compiled crate on disk. The Rust compiler needs access to these .rlib files because they contain the compiled code of the library. Rust will statically link that code into the final executable.
+
+The .rlib also contains type information so Rust can check that the library features we’re using in our code actually exist in the crate and that we’re using them correctly. It also contains a copy of the crate’s public inline functions, generics, and macros, features that can’t be fully compiled to machine code until Rust sees how we use them.
