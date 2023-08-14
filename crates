@@ -56,3 +56,17 @@ mod plant_structures{
 }
 
 If you want an item in a nested module to be visible to other crates, be sure to mark it and all enclosing modules as public.
+
+mod plant_structures{
+   pub mod roots {
+       pub mod products {
+          pub(in crate::plant_structures::roots) struct Cytokinin{
+          }
+       }
+       use products::Cytokinin;//OK
+   }
+       use roots::products::Cytokinin; //Error
+}
+
+In this way, we could write out a whole program, 
+with a huge amount of code and a whole hierarchy of modules, related in whatever ways we wanted, all in a single source file.
