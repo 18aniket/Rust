@@ -328,3 +328,20 @@ not(A)	A is not satisfied. To provide two different implementations of a functio
 all(A,B)	Both A and B are satisfied (the equivalent of &&).
 any(A,B)	Either A or B is satisfied (the equivalent of ||)
 
+// libgit2_sys/lib.rs
+#![allow(non_camel_case_types)]
+
+pub struct git_revspec {
+    ...
+}
+
+pub struct git_error {
+    ...
+}
+
+The #! tells Rust to attach an attribute to the enclosing item rather than whatever comes next: 
+in this case, the #![allow] attribute attaches to the whole libgit2_sys crate, not just struct git_revspec.
+
+#! can also be used inside functions, structs, and so on, but it’s only typically used at the beginning of a file, to attach an attribute to the whole module or crate. 
+Some attributes always use the #! syntax because they can only be applied to a whole crate.
+
