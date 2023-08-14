@@ -39,7 +39,20 @@ They act as Rust’s namespaces, containers for the functions, types, constants,
          pub(crate), meaning that it is available anywhere inside this crate, 
          but isn’t exposed as part of the external interface.
          */
-     }
-     
-     
+     }     
  }
+
+Nested Modules:-
+----------------
+
+mod plant_structures{
+   pub mod roots {
+
+   }
+
+   pub mod stems {
+
+   }
+}
+
+If you want an item in a nested module to be visible to other crates, be sure to mark it and all enclosing modules as public.
