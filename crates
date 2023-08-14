@@ -172,3 +172,25 @@ use AminoAcid::*;
 The keywords super and crate have a special meaning in paths: super refers to the parent module, 
 and crate refers to the crate containing the current module.
 
+Handling ambiguity:
+-------------------
+
+mod image {
+    pub struct Sampler{
+
+    }
+}
+
+use image::Pixels;
+
+If you have a module with the same name as a crate that you are using, then referring to their contents takes some care. 
+For example, if your program lists the image crate as a dependency in its Cargo.toml file, but also has a module named image, 
+then paths starting with image are ambiguous.
+
+To resolve the ambiguity, Rust has a special kind of path called an absolute path, starting with ::, which always refers to an external crate. To refer to the Pixels type in the image crate, you can write:
+
+use ::image::Pixels;        // the `image` crate's `Pixels`
+To refer to your own module’s Sampler type, you can write:
+
+use self::image::Sampler;   // the `image` module's `Sampler.
+
