@@ -293,5 +293,7 @@ fn main() {
 
 Because we’ve put this file into src/bin, Cargo will compile both the fern_sim library and this program the next time we run cargo build. 
 We can run the efern program using cargo run --bin efern.
+We still didn’t have to make any changes to Cargo.toml, because, again, Cargo’s default is to look at your source files and figure things out. 
+It automatically treats .rs files in src/bin as extra programs to build
 
 
