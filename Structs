@@ -253,4 +253,19 @@ but there are several advantages to doing so:
 
 //TBD.
 
+//Generic Structs-- TBD.
+
+Deriving Common Traits for Struct Types:-
+-----------------------------------------
+Structs can be very easy to write:
+
+struct Point {
+    x: f64,
+    y: f64
+}
+However, if you were to start using this Point type, you would quickly notice that it’s a bit of a pain. As written, Point is not copyable or cloneable. 
+You can’t print it with println!("{:?}", point); and it does not support the == and != operators.
+
+
+
 
