@@ -79,5 +79,47 @@ let (hokey1, hokey2) = chop(hokey);
 
 Tuple-Like structs:-
 --------------------
+The second kind of struct type is called a tuple-like struct, because it resembles a tuple:
+
+struct Bounds(usize, usize);
+
+You construct a value of this type much as you would construct a tuple, except that you must include the struct name:
+
+let image_bounds = Bounds(1024, 768);
+
+The values held by a tuple-like struct are called elements, just as the values of a tuple are. You access them just as you would a tuple’s:
+
+assert_eq!(image_bounds.0 * image_bounds.1, 786432);
+Individual elements of a tuple-like struct may be public or not:
+
+pub struct Bounds(pub usize, pub usize);
+
+Tuple-like structs are good for newtypes, structs with a single component that you define to get stricter type checking. 
+For example, if you are working with ASCII-only text, you might define a newtype like this.
+
+struct Ascii(Vec<u8>);
+
+Using this type for your ASCII strings is much better than simply passing around Vec<u8> buffers and explaining what they are in the comments.
+The newtype helps Rust catch mistakes where some other byte buffer is passed to a function expecting ASCII text.
+
+Unit-like structs:-
+-------------------
+The third kind of struct is a little obscure: it declares a struct type with no elements at all:
+
+struct Onesuch;
+
+A value of such a type occupies no memory, much like the unit type (). 
+Rust doesn’t bother actually storing unit-like struct values in memory or generating code to operate on them, 
+because it can tell everything it might need to know about the value from its type alone. 
+But logically, an empty struct is a type with values like any other—or more precisely, a type of which there is only a single value:
+
+let o = Onesuch;
+
+You’ve already encountered a unit-like struct when reading about the .. range operator in “Fields and Elements”.
+Whereas an expression like 3..5 is shorthand for the struct value Range { start: 3, end: 5 }, 
+the expression .., a range omitting both endpoints, is shorthand for the unit-like struct value RangeFull.
+
+
+
 
 
