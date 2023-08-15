@@ -146,3 +146,6 @@ Rust embeds pixels and size directly in the GrayscaleMap value.
 Only the heap-allocated buffer owned by the pixels vector remains in its own block
 
 You can ask Rust to lay out structures in a way compatible with C and C++, using the #[repr(C)] attribute.
+
+Defining Methods with impl:-
+----------------------------
