@@ -209,9 +209,48 @@ impl Queue {
 
 Passing Self as a Box,Rc, or Arc:-
 ----------------------------------
+A method’s self argument can also be a Box<Self>, Rc<Self>, or Arc<Self>. 
+Such a method can only be called on a value of the given pointer type. 
+Calling the method passes ownership of the pointer to it.
+
+let mut bq = Box::new(Queue::new());
+
+// `Queue::push` expects a `&mut Queue`, but `bq` is a `Box<Queue>`.
+// This is fine: Rust borrows a `&mut Queue` from the `Box` for the
+// duration of the call.
+bq.push('■');
 
 
+Type-Associated Functions:-
+---------------------------
+An impl block for a given type can also define functions that don’t take self as an argument at all. 
+These are still associated functions, since they’re in an impl block, but they’re not methods, since they don’t take a self argument. 
+To distinguish them from methods, we call them type-associated functions.
 
+They’re often used to provide constructor functions, like this:
 
+impl Queue {
+    pub fn new() -> Queue {
+        Queue { older: Vec::new(), younger: Vec::new() }
+    }
+}
+
+To use this function, we refer to it as Queue::new: the type name, a double colon, and then the function name. Now our example code becomes a bit more svelte:
+
+let mut q = Queue::new();
+
+q.push('*');
+...
+
+It’s conventional in Rust for constructor functions to be named new; we’ve already seen Vec::new, Box::new, HashMap::new, and others.
+But there’s nothing special about the name new. 
+It’s not a keyword, and types often have other associated functions that serve as constructors, like Vec::with_capacity.
+
+Although you can have many separate impl blocks for a single type, they must all be in the same crate that defines that type.
+
+If you’re used to C++ or Java, separating a type’s methods from its definition may seem unusual, 
+but there are several advantages to doing so:
+
+//TBD.
 
 
