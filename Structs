@@ -136,3 +136,13 @@ stack frame --------------------------------------------------------------------
             ------------------------------------------------------------------------
                    | 0 | 0 | 0 | ...
             ------------------------------------------------------------------------
+
+Unlike C and C++, Rust doesn’t make specific promises about how it will order a struct’s fields or elements in memory; 
+this diagram shows only one possible arrangement.
+
+However, Rust does promise to store fields’ values directly in the struct’s block of memory. 
+Whereas JavaScript, Python, and Java would put the pixels and size values each in their own heap-allocated blocks and have GrayscaleMap’s fields point at them, 
+Rust embeds pixels and size directly in the GrayscaleMap value. 
+Only the heap-allocated buffer owned by the pixels vector remains in its own block
+
+You can ask Rust to lay out structures in a way compatible with C and C++, using the #[repr(C)] attribute.
