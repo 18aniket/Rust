@@ -263,9 +263,35 @@ struct Point {
     x: f64,
     y: f64
 }
-However, if you were to start using this Point type, you would quickly notice that it’s a bit of a pain. As written, Point is not copyable or cloneable. 
+However, if you were to start using this Point type, you would quickly notice that it’s a bit of a pain. 
+As written, Point is not copyable or cloneable. 
 You can’t print it with println!("{:?}", point); and it does not support the == and != operators.
 
+Each of these features has a name in Rust—Copy, Clone, Debug, and PartialEq. They are called traits.
+
+we’ll show how to implement traits by hand for your own structs. But in the case of these standard traits, and several others, you don’t need to implement them by hand unless you want some kind of custom behavior. Rust can automatically implement them for you, with mechanical accuracy. Just add a #[derive] attribute to the struct:
+
+#[derive(Copy, Clone, Debug, PartialEq)]
+struct Point {
+    x: f64,
+    y: f64
+}
+
+We can ask Rust to derive PartialEq for Point because its two fields are both of type f64, which already implements PartialEq.
+
+Interior Mutability:-
+---------------------
+
+Mutability is like anything else: in excess, it causes problems, but you often want just a little bit of it. For example, say your spider robot control system has a central struct, SpiderRobot, that contains settings and I/O handles. It’s set up when the robot boots, and the values never change:
+
+pub struct SpiderRobot {
+    species: String,
+    web_enabled: bool,
+    leg_devices: [fd::FileDesc; 8],
+    ...
+}
+
+To Be complete.
 
 
 
