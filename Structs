@@ -188,3 +188,30 @@ impl Queue {
     }
 }
 
+Simply writing q.push(...) borrows a mutable reference to q, as if you had written (&mut q).push(...), 
+since that’s what the push method’s self requires.
+
+If a method doesn’t need to modify its self, then you can define it to take a shared reference instead. For example:
+
+impl Queue {
+    pub fn is_empty(&self) -> bool {
+        self.older.is_empty() && self.younger.is_empty()
+    }
+}
+
+Or, if a method wants to take ownership of self, it can take self by value:
+
+impl Queue {
+    pub fn split(self) -> (Vec<char>, Vec<char>) {
+        (self.older, self.younger)
+    }
+}
+
+Passing Self as a Box,Rc, or Arc:-
+----------------------------------
+
+
+
+
+
+
