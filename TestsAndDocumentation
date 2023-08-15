@@ -60,4 +60,32 @@ Rust’s test harness uses multiple threads to run several tests at a time,
 a nice side benefit of your Rust code being thread-safe by default. 
 To disable this, either run a single test, cargo test testname, or run cargo test -- --test-threads 1.
 
+Documentation
+-------------
+The command cargo doc creates HTML documentation for your library:
+
+$ cargo doc --no-deps --open
+ Documenting fern_sim v0.1.0 (file:///.../fern_sim)
+The --no-deps option tells Cargo to generate documentation only for fern_sim itself, and not for all the crates it depends on.
+
+The --open option tells Cargo to open the documentation in your browser afterward.
+
+Likewise, comments starting with //! are treated as #![doc] attributes and are attached to the enclosing feature, typically a module or crate. 
+For example, your file might begin like this:
+
+//! Simulate the growth of ferns, from the level of
+//! individual cells on up.
+
+/// Simulate the production of a spore by meiosis.
+pub fn produce_spore(factory: &mut Sporangium) -> Spore {
+    ...
+}
+But when Rust sees comments that start with three slashes, it treats them as a #[doc] attribute instead. 
+Rust treats the preceding example exactly the same as this:
+
+#[doc = "Simulate the production of a spore by meiosis."]
+pub fn produce_spore(factory: &mut Sporangium) -> Spore {
+    ...
+}
+
 
