@@ -133,3 +133,10 @@ struct FileDesc {
     fd: c_int,
 }
 
+impl Drop for FileDesc {
+    fn drop(&mut self) {
+        let _ = unsafe { libc::close(self.fd) };
+    }
+}
+Here, libc::close is the Rust name for the C library’s close function. 
+Rust code may call C functions only within unsafe blocks, so the library uses one here.
