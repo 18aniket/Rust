@@ -1,1 +1,52 @@
+Traits are Rust’s take on interfaces or abstract base classes. At first, they look just like interfaces in Java or C#.
+
+The trait for writing bytes is called std::io::Write, and its definition in the standard library starts out like this:
+
+trait Write {
+    fn write(&mut self, buf: &[u8]) -> Result<usize>;
+    fn flush(&mut self) -> Result<()>;
+
+    fn write_all(&mut self, buf: &[u8]) -> Result<()> { ... }
+    ...
+}
+
+ Code that uses a writer without caring about its type looks like this:
+
+use std::io::Write;
+
+fn say_hello(out: &mut dyn Write) -> std::io::Result<()> {
+    out.write_all(b"hello world\n")?;
+    out.flush()
+}
+
+The type of out is &mut dyn Write, meaning “a mutable reference to any value that implements the Write trait.” We can pass say_hello a mutable reference to any such value:
+
+use std::fs::File;
+let mut local_file = File::create("hello.txt")?;
+say_hello(&mut local_file)?;  // works
+
+let mut bytes = vec![];
+say_hello(&mut bytes)?;  // also works
+assert_eq!(bytes, b"hello world\n");
+
+We’ll explain why adding a trait to a type costs no extra memory and how to use traits without virtual method call overhead. 
+We’ll see that built-in traits are the hook into the language that Rust provides for operator overloading and other features. 
+And we’ll cover the Self type, associated functions, and associated types, 
+three features Rust lifted from Haskell that elegantly solve problems that other languages address with workarounds and hacks.
+
+Generics are the other flavor of polymorphism in Rust. Like a C++ template, a generic function or type can be used with values of many different types:
+
+/// Given two values, pick whichever one is less.
+fn min<T: Ord>(value1: T, value2: T) -> T {
+    if value1 <= value2 {
+        value1
+    } else {
+        value2
+    }
+}
+
+The <T: Ord> in this function means that min can be used with arguments of any type T that implements the Ord trait—that is, 
+any ordered type. A requirement like this is called a bound, because it sets limits on which types T could possibly be. 
+The compiler generates custom machine code for each type T that you actually use.
+
 
