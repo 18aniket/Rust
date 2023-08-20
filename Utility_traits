@@ -22,6 +22,7 @@ These include Default, the reference-borrowing traits AsRef, AsMut, Borrow and B
 the fallible conversion traits TryFrom and TryInto; and the ToOwned trait, a generalization of Clone.
 
 Trait	  Description
+-----   -----------
 Drop	- Destructors. Cleanup code that Rust runs automatically whenever a value is dropped.
 Sized	- Marker trait for types with a fixed size known at compile time, as opposed to types (such as slices) that are dynamically sized.
 Clone	- Types that support cloning values.
@@ -34,3 +35,87 @@ From and Into	- Conversion traits for transforming one type of value into anothe
 TryFrom and TryInto	- Conversion traits for transforming one type of value into another, for transformations that might fail.
 ToOwned	- Conversion trait for converting a reference to an owned value.
 
+Drop:-
+------
+When a value’s owner goes away, we say that Rust drops the value. 
+Dropping a value entails freeing whatever other values, heap storage, and system resources the value owns.
+Drops occur under a variety of circumstances: when a variable goes out of scope; at the end of an expression statement; when you truncate a vector, removing elements from its end; and so on.
+
+struct Appellation {
+    name: String,
+    nicknames: Vec<String>
+}
+
+An Appellation owns heap storage for the strings’ contents and the vector’s buffer of elements. 
+Rust takes care of cleaning all that up whenever an Appellation is dropped, without any further coding necessary on your part. 
+However, if you want, you can customize how Rust drops values of your type by implementing the std::ops::Drop trait:
+
+trait Drop {
+    fn drop(&mut self);
+}
+
+An implementation of Drop is analogous to a destructor in C++, or a finalizer in other languages. 
+When a value is dropped, if it implements std::ops::Drop, Rust calls its drop method, 
+before proceeding to drop whatever values its fields or elements own, as it normally would. 
+This implicit invocation of drop is the only way to call that method; if you try to invoke it explicitly yourself, 
+Rust flags that as an error.
+
+Because Rust calls Drop::drop on a value before dropping its fields or elements, 
+the value the method receives is always still fully initialized. An implementation of Drop for our Appellation type can make full use of its fields:
+
+impl Drop for Appellation {
+    fn drop(&mut self) {
+        print!("Dropping {}", self.name);
+        if !self.nicknames.is_empty() {
+            print!(" (AKA {})", self.nicknames.join(", "));
+        }
+        println!("");
+    }
+}
+
+Given that implementation, we can write the following:
+
+{
+    let mut a = Appellation {
+        name: "Zeus".to_string(),
+        nicknames: vec!["cloud collector".to_string(),
+                        "king of the gods".to_string()]
+    };
+
+    println!("before assignment");
+    a = Appellation { name: "Hera".to_string(), nicknames: vec![] };
+    println!("at end of block");
+}
+
+When we assign the second Appellation to a, the first is dropped, and when we leave the scope of a, the second is dropped. 
+This code prints the following:
+
+before assignment
+Dropping Zeus (AKA cloud collector, king of the gods)
+at end of block
+Dropping Hera
+
+Since our std::ops::Drop implementation for Appellation does nothing but print a message, how, exactly, does its memory get cleaned up? 
+The Vec type implements Drop, dropping each of its elements and then freeing the heap-allocated buffer they occupied. 
+A String uses a Vec<u8> internally to hold its text, so String need not implement Drop itself; it lets its Vec take care of freeing the characters. 
+The same principle extends to Appellation values: when one gets dropped, in the end it is Vec’s implementation of Drop that actually takes care of freeing each of the strings’ contents, 
+and finally freeing the buffer holding the vector’s elements. 
+As for the memory that holds the Appellation value itself, it too has some owner, perhaps a local variable or some data structure, which is responsible for freeing it.
+
+If a variable’s value gets moved elsewhere, so that the variable is uninitialized when it goes out of scope, 
+then Rust will not try to drop that variable: there is no value in it to drop.
+
+This principle holds even when a variable may or may not have had its value moved away, depending on the flow of control. 
+In cases like this, 
+Rust keeps track of the variable’s state with an invisible flag indicating whether the variable’s value needs to be dropped or not:
+
+let p;
+{
+    let q = Appellation { name: "Cardamine hirsuta".to_string(),
+                          nicknames: vec!["shotweed".to_string(),
+                                          "bittercress".to_string()] };
+    if complicated_condition() {
+        p = q;
+    }
+}
+println!("Sproing! What was that?");
