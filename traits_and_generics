@@ -148,3 +148,12 @@ let w: Box<dyn Write> = Box::new(local_file);
 Box<dyn Write>, like &mut dyn Write, is a fat pointer: it contains the address of the writer itself and the address of the vtable. 
 The same goes for other pointer types, like Rc<dyn Write>.
 
+
+Generic Functions and Type Parameters:-
+---------------------------------------
+
+TODO
+
+
+
+
