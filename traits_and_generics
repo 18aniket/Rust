@@ -94,3 +94,14 @@ This is rare in practice. (If you do run into a conflict, you can spell out what
 The reason Clone and Iterator methods work without any special imports is that they’re always in scope by default: 
 they’re part of the standard prelude, names that Rust automatically imports into every module. 
 In fact, the prelude is mostly a carefully chosen selection of traits.
+
+C++ and C# programmers will already have noticed that trait methods are like virtual methods. 
+Still, calls like the one shown above are fast, as fast as any other method call.
+
+Only calls through &mut dyn Write incur the overhead of a dynamic dispatch, 
+also known as a virtual method call, which is indicated by the dyn keyword in the type. dyn Write is known as a trait object.
+
+Trait Objects:-
+---------------
+
+
