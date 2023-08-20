@@ -119,3 +119,17 @@ let p;
     }
 }
 println!("Sproing! What was that?");
+
+Depending on whether complicated_condition returns true or false, either p or q will end up owning the Appellation, 
+with the other uninitialized. Where it lands determines whether it is dropped before or after the println!, 
+since q goes out of scope before the println!, and p after. 
+Although a value may be moved from place to place, Rust drops it only once.
+
+You usually won’t need to implement std::ops::Drop unless you’re defining a type that owns resources Rust doesn’t already know about. 
+For example, on Unix systems, 
+Rust’s standard library uses the following type internally to represent an operating system file descriptor.
+
+struct FileDesc {
+    fd: c_int,
+}
+
