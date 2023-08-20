@@ -103,5 +103,48 @@ also known as a virtual method call, which is indicated by the dyn keyword in th
 
 Trait Objects:-
 ---------------
+There are two ways of using traits to write polymorphic code in Rust: trait objects and generics. 
+use std::io::Write;
 
+let mut buf: Vec<u8> = vec![];
+let writer: dyn Write = buf;  // error: `Write` does not have a constant size.
+
+A variable’s size has to be known at compile time, and types that implement Write can be any size.
+
+This may be surprising if you’re coming from C# or Java, but the reason is simple. 
+In Java, a variable of type OutputStream (the Java standard interface analogous to std::io::Write) 
+is a reference to any object that implements OutputStream. The fact that it’s a reference goes without saying. 
+It’s the same with interfaces in C# and most other languages.
+
+What we want in Rust is the same thing, but in Rust, references are explicit
+
+let mut buf: Vec<u8> = vec![];
+let writer: &mut dyn Write = &mut buf;  // ok
+
+A reference to a trait type, like writer, is called a trait object.
+What makes a trait object different is that Rust usually doesn’t know the type of the referent at compile time.
+
+This is strictly for Rust’s own use behind the scenes: when you call writer.write(data), 
+Rust needs the type information to dynamically call the right write method depending on the type of *writer. 
+You can’t query the type information directly.
+Rust does not support downcasting from the trait object &mut dyn Write back to a concrete type like Vec<u8>.
+
+Trait object layout:-
+---------------------
+TODO:-VPTR CONCEPTS
+
+Rust automatically converts ordinary references into trait objects when needed. 
+This is why we’re able to pass &mut local_file to say_hello in this example:
+
+let mut local_file = File::create("hello.txt")?;
+say_hello(&mut local_file)?;
+
+The type of &mut local_file is &mut File, and the type of the argument to say_hello is &mut dyn Write. 
+Since a File is a kind of writer, Rust allows this, automatically converting the plain reference to a trait object.
+
+Likewise, Rust will happily convert a Box<File> to a Box<dyn Write>, a value that owns a writer in the heap:
+
+let w: Box<dyn Write> = Box::new(local_file);
+Box<dyn Write>, like &mut dyn Write, is a fat pointer: it contains the address of the writer itself and the address of the vtable. 
+The same goes for other pointer types, like Rc<dyn Write>.
 
