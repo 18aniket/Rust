@@ -244,6 +244,19 @@ let u: Rc<String> = s.clone();
 For any type T, an Rc<T> value is a pointer to a heap-allocated T that has had a reference count affixed to it. Cloning an Rc<T> value does not copy the T; instead, it simply creates another pointer to it and increments the reference count.
 Each of the three Rc<String> pointers is referring to the same block of memory, which holds a reference count and space for the String. The usual ownership rules apply to the Rc pointers themselves, and when the last extant Rc is dropped, Rust drops the String as well.
 
+stack  -----------------------------------------------------------
+              |  s  |    |  t |    |  u  |
+       -----------------------------------------------------------
+                 |          /         /
+                 |         /         /
+       -----------------------------------------------------------
+Heap           |            3           |   |     |  16 |  9  |       3 is strong ref count.
+       -----------------------------------------------------------
+
+       -----------------------------------------------------------
+                               | shirataki |   |
+       -----------------------------------------------------------
+
 You can use any of String’s usual methods directly on an Rc<String>:
 
 assert!(s.contains("shira"));
