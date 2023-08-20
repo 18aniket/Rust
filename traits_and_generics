@@ -90,3 +90,7 @@ buf.write_all(b"hello")?;  // ok
 Rust makes you import the traits you plan to use, crates are free to take advantage of this superpower. 
 To get a conflict, you’d have to import two traits that add a method with the same name to the same type. 
 This is rare in practice. (If you do run into a conflict, you can spell out what you want using fully qualified method syntax.)
+
+The reason Clone and Iterator methods work without any special imports is that they’re always in scope by default: 
+they’re part of the standard prelude, names that Rust automatically imports into every module. 
+In fact, the prelude is mostly a carefully chosen selection of traits.
