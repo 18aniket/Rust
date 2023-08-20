@@ -49,4 +49,44 @@ The <T: Ord> in this function means that min can be used with arguments of any t
 any ordered type. A requirement like this is called a bound, because it sets limits on which types T could possibly be. 
 The compiler generates custom machine code for each type T that you actually use.
 
+Generics and traits are closely related: generic functions use traits in bounds to spell out what types of arguments they can be applied to. 
+So we’ll also talk about how &mut dyn Write and <T: Write> are similar, how they’re different, and how to choose between these two ways of using traits.
 
+Using Traits:-
+--------------
+A trait  is a feature that any given type may or may not support. Most often, a trait represents a capability: something a type can do.
+
+A value that implements std::io::Write can write out bytes.
+
+A value that implements std::iter::Iterator can produce a sequence of values.
+
+A value that implements std::clone::Clone can make clones of itself in memory.
+
+A value that implements std::fmt::Debug can be printed using println!() with the {:?} format specifier.
+
+Those four traits are all part of Rust’s standard library, and many standard types implement them. For example:
+
+std::fs::File implements the Write trait; it writes bytes to a local file. std::net::TcpStream writes to a network connection. 
+Vec<u8> also implements Write. Each .write() call on a vector of bytes appends some data to the end.
+
+Range<i32> (the type of 0..10) implements the Iterator trait, as do some iterator types associated with slices, hash tables, and so on.
+
+Most standard library types implement Clone. 
+The exceptions are mainly types like TcpStream that represent more than just data in memory.
+
+Likewise, most standard library types support Debug.
+
+There is one unusual rule about trait methods: the trait itself must be in scope. Otherwise, all its methods are hidden:
+let mut buf: Vec<u8> = vec![];
+buf.write_all(b"hello")?;  // error: no method named `write_all`
+
+In this case, the compiler prints a friendly error message that suggests adding use std::io::Write; and indeed that fixes the problem:
+
+use std::io::Write;
+
+let mut buf: Vec<u8> = vec![];
+buf.write_all(b"hello")?;  // ok
+
+Rust makes you import the traits you plan to use, crates are free to take advantage of this superpower. 
+To get a conflict, you’d have to import two traits that add a method with the same name to the same type. 
+This is rare in practice. (If you do run into a conflict, you can spell out what you want using fully qualified method syntax.)
