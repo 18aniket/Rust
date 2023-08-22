@@ -144,3 +144,11 @@ Rust code may call C functions only within unsafe blocks, so the library uses on
 If a type implements Drop, it cannot implement the Copy trait. If a type is Copy, 
 that means that simple byte-for-byte duplication is sufficient to produce an independent copy of the value. 
 But it is typically a mistake to call the same drop method more than once on the same data.
+
+
+The standard prelude includes a function to drop a value, drop, but its definition is anything but magical:
+
+fn drop<T>(_x: T) { }
+
+In other words, it receives its argument by value, taking ownership from the caller—and then does nothing with it. 
+Rust drops the value of _x when it goes out of scope, as it would for any other variable.
