@@ -152,3 +152,103 @@ fn drop<T>(_x: T) { }
 
 In other words, it receives its argument by value, taking ownership from the caller—and then does nothing with it. 
 Rust drops the value of _x when it goes out of scope, as it would for any other variable.
+
+Sized:-
+-------
+A sized type is one whose values all have the same size in memory.
+Almost all types in Rust are sized: every u64 takes eight bytes, every (f32, f32, f32) tuple twelve. 
+Even enums are sized: no matter which variant is actually present, an enum always occupies enough space to hold its largest variant.
+And although a Vec<T> owns a heap-allocated buffer whose size can vary, the Vec value itself is a pointer to the buffer, its capacity, and its length, 
+so Vec<T> is a sized type.
+
+All sized types implement the std::marker::Sized trait, which has no methods or associated types. 
+Rust implements it automatically for all types to which it applies; you can’t implement it yourself.
+The only use for Sized is as a bound for type variables: a bound like T: Sized requires T to be a type whose size is known at compile time. 
+Traits of this sort are called marker traits.
+
+However, Rust also has a few unsized types whose values are not all the same size. 
+For example, the string slice type str (note, without an &) is unsized. 
+The string literals "diminutive" and "big" are references to str slices that occupy ten and three bytes. 
+
+TO BE DEEP DIVE IN.
+
+
+Clone:-
+-------
+The std::clone::Clone trait is for types that can make copies of themselves. Clone is defined as follows:
+trait Clone: Sized {
+    fn clone(&self) -> Self;
+    fn clone_from(&mut self, source: &Self) {
+        *self = source.clone()
+    }
+}
+
+The clone method should construct an independent copy of self and return it.
+Since this method’s return type is Self and functions may not return unsized values, the Clone trait itself extends the Sized trait: 
+this has the effect of bounding implementations’ Self types to be Sized.
+Cloning a value usually entails allocating copies of anything it owns, as well, so a clone can be expensive, in both time and memory.
+
+For example, cloning a Vec<String> not only copies the vector, but also copies each of its String elements. 
+This is why Rust doesn’t just clone values automatically, but instead requires you to make an explicit method call.
+
+The reference-counted pointer types like Rc<T> and Arc<T> are exceptions: 
+cloning one of these simply increments the reference count and hands you a new pointer.
+
+The clone_from method modifies self into a copy of source. 
+The default definition of clone_from simply clones source and then moves that into *self.
+
+For example, suppose s and t are Strings. The statement s = t.clone();
+must clone t, drop the old value of s, and then move the cloned value into s; that’s one heap allocation and one heap deallocation.
+
+But if the heap buffer belonging to the original s has enough capacity to hold t’s contents, no allocation or deallocation is necessary: 
+you can simply copy t’s text into s’s buffer and adjust the length.
+
+In generic code, you should use clone_from whenever possible to take advantage of optimized implementations when present.
+
+If your Clone implementation simply applies clone to each field or element of your type and then constructs a new value from those clones, 
+and the default definition of clone_from is good enough ,then Rust will implement that for you: simply put #[derive(Clone)] above your type definition.
+
+Copy:-
+------
+For most types, assignment moves values, rather than copying them. Moving values makes it much simpler to track the resources they own.
+But in “Copy Types: The Exception to Moves”, we pointed out the exception: simple types that don’t own any resources can be Copy types, 
+where assignment makes a copy of the source, rather than moving the value and leaving the source uninitialized.
+
+At that time, we left it vague exactly what Copy was, but now we can tell you: 
+a type is Copy if it implements the std::marker::Copy marker trait, which is defined as follows:
+
+trait Copy: Clone { }
+
+This is certainly easy to implement for your own types:
+
+impl Copy for MyType { }
+
+Types that own any other resources, like heap buffers or operating system handles, cannot implement Copy.
+
+As with Clone, you can ask Rust to derive Copy for you, using #[derive(Copy)]. You will often see both derived at once, with #[derive(Copy, Clone)].
+
+Deref and DerefMut:-
+--------------------
+You can specify how dereferencing operators like * and . behave on your types by implementing the 
+std::ops::Deref and std::ops::DerefMut traits.
+Pointer types like Box<T> and Rc<T> implement these traits so that they can behave as Rust’s built-in pointer types do.
+For example, if you have a Box<Complex> value b, then *b refers to the Complex value that b points to, 
+and b.re refers to its real component.
+
+The traits are defined like this:
+
+trait Deref {
+    type Target: ?Sized;
+    fn deref(&self) -> &Self::Target;
+}
+
+trait DerefMut: Deref {
+    fn deref_mut(&mut self) -> &mut Self::Target;
+}
+
+The Deref and DerefMut traits play another role as well. Since deref takes a &Self reference and returns a &Self::Target reference, 
+Rust uses this to automatically convert references of the former type into the latter.
+
+
+
+
