@@ -140,3 +140,7 @@ impl Drop for FileDesc {
 }
 Here, libc::close is the Rust name for the C library’s close function. 
 Rust code may call C functions only within unsafe blocks, so the library uses one here.
+
+If a type implements Drop, it cannot implement the Copy trait. If a type is Copy, 
+that means that simple byte-for-byte duplication is sufficient to produce an independent copy of the value. 
+But it is typically a mistake to call the same drop method more than once on the same data.
