@@ -250,5 +250,29 @@ The Deref and DerefMut traits play another role as well. Since deref takes a &Se
 Rust uses this to automatically convert references of the former type into the latter.
 
 
+Default:-
+---------
+Some types have a reasonably obvious default value: the default vector or string is empty, the default number is zero, the default Option is None, and so on.
+
+Types like this can implement the std::default::Default trait:
+
+trait Default {
+    fn default() -> Self;
+}
+
+The default method simply returns a fresh value of type Self. String’s implementation of Default is straightforward:
+
+impl Default for String {
+    fn default() -> String {
+        String::new()
+    }
+}
+
+Rust does not implicitly implement Default for struct types, 
+but if all of a struct’s fields implement Default, you can implement Default for the struct automatically using #[derive(Default)]
+
+//DEEP DIVE IN -- TODO
+
+
 
 
