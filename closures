@@ -117,3 +117,166 @@ The move keyword tells Rust that a closure doesn’t borrow the variables it use
 
 The first closure, key_fn, takes ownership of stat. Then the second closure takes ownership of both cities and key_fn.
 
+Functions and Closure Types:-
+-----------------------------
+Throughout this chapter, we’ve seen functions and closures used as values. Naturally, this means that they have types. For example:
+
+fn city_population_descending(city: &City) -> i64 {
+    -city.population
+}
+This function takes one argument (a &City) and returns an i64. It has the type fn(&City) -> i64.
+
+You can do all the same things with functions that you do with other values. You can store them in variables. 
+You can use all the usual Rust syntax to compute function values:
+
+let my_key_fn: fn(&City) -> i64 =
+    if user.prefs.by_population {
+        city_population_descending
+    } else {
+        city_monster_attack_risk_descending
+    };
+
+cities.sort_by_key(my_key_fn);
+
+Structs may have function-typed fields. Generic types like Vec can store scads of functions, as long as they all share the same fn type. 
+And function values are tiny: a fn value is the memory address of the function’s machine code, just like a function pointer in C++.
+
+A function can take another function as an argument. For example:
+
+/// Given a list of cities and a test function,
+/// return how many cities pass the test.
+fn count_selected_cities(cities: &Vec<City>,
+                         test_fn: fn(&City) -> bool) -> usize
+{
+    let mut count = 0;
+    for city in cities {
+        if test_fn(city) {
+            count += 1;
+        }
+    }
+    count
+}
+
+/// An example of a test function. Note that the type of
+/// this function is `fn(&City) -> bool`, the same as
+/// the `test_fn` argument to `count_selected_cities`.
+fn has_monster_attacks(city: &City) -> bool {
+    city.monster_attack_risk > 0.0
+}
+
+// How many cities are at risk for monster attack?
+let n = count_selected_cities(&my_cities, has_monster_attacks);
+
+fn(&City) -> bool    // fn type (functions only)
+Fn(&City) -> bool    // Fn trait (both functions and closures)
+
+
+Closure Performance:-
+---------------------
+Rust’s closures are designed to be fast: faster than function pointers, fast enough that you can use them even in red-hot, performance-sensitive code. 
+If you’re familiar with C++ lambdas, you’ll find that Rust closures are just as fast and compact, but safer.
+
+Rust closures have none of these performance drawbacks. They’re not garbage collected. 
+Like everything else in Rust, they aren’t allocated on the heap unless you put them in a Box, Vec, or other container.
+
+TODO:- Layout if closures in memory.
+
+Closures and Safety:-
+---------------------
+
+Closures That Kill:-
+====================
+We have seen closures that borrow values and closures that steal them; it was only a matter of time before they went all the way bad.
+
+Of course, kill is not really the right terminology. In Rust, we drop values. The most straightforward way to do it is to call drop():
+
+let my_str = "hello".to_string();
+let f = || drop(my_str);
+
+When f is called, my_str is dropped.
+
+So what happens if we call it twice?
+
+f();
+f();
+
+Let’s think it through. The first time we call f, it drops my_str, which means the memory where the string is stored is freed, 
+returned to the system. The second time we call f, the same thing happens. 
+It’s a double free, a classic mistake in C++ programming that triggers undefined behavior.
+
+Dropping a String twice would be an equally bad idea in Rust. Fortunately, Rust can’t be fooled so easily:
+
+f();  // ok
+f();  // error: use of moved value
+Rust knows this closure can’t be called twice.
+
+FnOnce:-
+========
+Let’s try once more to trick Rust into dropping a String twice. This time, we’ll use this generic function:
+
+fn call_twice<F>(closure: F) where F: Fn() {
+    closure();
+    closure();
+}
+
+Now what happens if we pass our unsafe closure to this generic function?
+
+let my_str = "hello".to_string();
+let f = || drop(my_str);
+call_twice(f);
+Again, the closure will drop my_str when it’s called. Calling it twice would be a double free. But again, Rust is not fooled:
+
+error: expected a closure that implements the `Fn` trait, but
+       this closure only implements `FnOnce`
+    |
+  8 | let f = || drop(my_str);
+    |         ^^^^^^^^------^
+    |         |       |
+    |         |       closure is `FnOnce` because it moves the variable `my_str`
+    |         |       out of its environment
+    |         this closure implements `FnOnce`, not `Fn`
+  9 | call_twice(f);
+    | ---------- the requirement to implement `Fn` derives from here
+
+
+Rust restricts their use. Closures that drop values, like f, are not allowed to have Fn. 
+They are, quite literally, no Fn at all. They implement a less powerful trait, FnOnce, the trait of closures that can be called once.
+
+The first time you call a FnOnce closure, the closure itself is used up.  It’s as though the two traits, Fn and FnOnce, were defined like this:
+
+// Pseudocode for `Fn` and `FnOnce` traits with no arguments.
+trait Fn() -> R {
+    fn call(&self) -> R;
+}
+
+trait FnOnce() -> R {
+    fn call_once(self) -> R;
+}
+
+FnMut:-
+=======
+
+copy and clone for closures:-
+=============================
+
+
+Callbacks:-
+-----------
+A lot of libraries use callbacks as part of their API: functions provided by the user, for the library to call later. 
+
+struct Request {
+    method: String,
+    url: String,
+    headers: HashMap<String, String>,
+    body: Vec<u8>
+}
+
+struct Response {
+    code: u32,
+    headers: HashMap<String, String>,
+    body: Vec<u8>
+}
+
+TODO:Examples.
+
+
