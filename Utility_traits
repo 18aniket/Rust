@@ -313,5 +313,55 @@ trait ToOwned {
     fn to_owned(&self) -> Self::Owned;
 }
 
-Unlike clone, which must return exactly Self, to_owned can return anything you could borrow a &Self from: the Owned type must implement Borrow<Self>. You can borrow a &[T] from a Vec<T>, so [T] can implement ToOwned<Owned=Vec<T>>, as long as T implements Clone, so that we can copy the slice’s elements into the vector. 
+Unlike clone, which must return exactly Self, to_owned can return anything you could borrow a &Self from: the Owned type must implement Borrow<Self>. 
+You can borrow a &[T] from a Vec<T>, so [T] can implement ToOwned<Owned=Vec<T>>, as long as T implements Clone, so that we can copy the slice’s elements into the vector. 
 Similarly, str implements ToOwned<Owned=String>, Path implements ToOwned<Owned=PathBuf>, and so on.
+
+From and Into:-
+---------------
+
+The std::convert::From and std::convert::Into traits represent conversions that consume a value of one type and return a value of another.
+Whereas the AsRef and AsMut traits borrow a reference of one type from another, 
+From and Into take ownership of their argument, transform it, and then return ownership of the result back to the caller.
+
+trait Into<T>: Sized {
+    fn into(self) -> T;
+}
+
+trait From<T>: Sized {
+    fn from(other: T) -> Self;
+}
+
+You generally use Into to make your functions more flexible in the arguments they accept. For example, if you write:
+
+use std::net::Ipv4Addr;
+fn ping<A>(address: A) -> std::io::Result<bool>
+    where A: Into<Ipv4Addr>
+{
+    let ipv4_address = address.into();
+    ...
+}
+
+then ping can accept not just an Ipv4Addr as an argument, but also a u32 or a [u8; 4] array, 
+since those types both conveniently happen to implement Into<Ipv4Addr>.
+(It’s sometimes useful to treat an IPv4 address as a single 32-bit value, or an array of 4 bytes.)
+
+As with AsRef in the previous section, the effect is much like that of overloading a function in C++. 
+With the definition of ping from before, we can make any of these calls:
+
+println!("{:?}", ping(Ipv4Addr::new(23, 21, 68, 141))); // pass an Ipv4Addr
+println!("{:?}", ping([66, 146, 219, 98]));             // pass a [u8; 4]
+println!("{:?}", ping(0xd076eb94_u32));                 // pass a u32
+
+
+The From trait, however, plays a different role. 
+The from method serves as a generic constructor for producing an instance of a type from some other single value.
+
+or example, rather than Ipv4Addr having two methods named from_array and from_u32, 
+it simply implements From<[u8;4]> and From<u32>, allowing us to write:
+
+let addr1 = Ipv4Addr::from([66, 146, 219, 98]);
+let addr2 = Ipv4Addr::from(0xd076eb94_u32);
+
+However, cheap conversions are not part of Into and From’s contract. 
+Whereas AsRef and AsMut conversions are expected to be cheap, From and Into conversions may allocate, copy, or otherwise process the value’s contents.
