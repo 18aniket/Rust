@@ -365,3 +365,10 @@ let addr2 = Ipv4Addr::from(0xd076eb94_u32);
 
 However, cheap conversions are not part of Into and From’s contract. 
 Whereas AsRef and AsMut conversions are expected to be cheap, From and Into conversions may allocate, copy, or otherwise process the value’s contents.
+
+The ? operator uses From and Into to help clean up code in functions that 
+could fail in multiple ways by automatically converting from specific error types to general ones when needed.
+
+//TODO - Deep Dive In
+
+
