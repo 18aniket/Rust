@@ -273,6 +273,45 @@ but if all of a struct’s fields implement Default, you can implement Default f
 
 //DEEP DIVE IN -- TODO
 
+AsRef and AsMut:-
+-----------------
+When a type implements AsRef<T>, that means you can borrow a &T from it efficiently.
+AsMut is the analogue for mutable references. Their definitions are as follows:
 
+trait AsRef<T: ?Sized> {
+    fn as_ref(&self) -> &T;
+}
 
+trait AsMut<T: ?Sized> {
+    fn as_mut(&mut self) -> &mut T;
+}
 
+So, for example, Vec<T> implements AsRef<[T]>, and String implements AsRef<str>. 
+You can also borrow a String’s contents as an array of bytes, so String implements AsRef<[u8]> as well.
+
+AsRef is typically used to make functions more flexible in the argument types they accept. 
+For example, the std::fs::File::open function is declared like this:
+
+fn open<P: AsRef<Path>>(path: P) -> Result<File>
+
+What open really wants is a &Path, the type representing a filesystem path. 
+But with this signature, open accepts anything it can borrow a &Path from—that is, anything that implements AsRef<Path>.
+
+ToOwned:-
+---------
+
+Given a reference, the usual way to produce an owned copy of its referent is to call clone, assuming the type implements std::clone::Clone. 
+But what if you want to clone a &str or a &[i32]?
+What you probably want is a String or a Vec<i32>, but Clone’s definition doesn’t permit that: by definition, 
+cloning a &T must always return a value of type T, and str and [u8] are unsized; 
+they aren’t even types that a function could return.
+
+The std::borrow::ToOwned trait provides a slightly looser way to convert a reference to an owned value:
+
+trait ToOwned {
+    type Owned: Borrow<Self>;
+    fn to_owned(&self) -> Self::Owned;
+}
+
+Unlike clone, which must return exactly Self, to_owned can return anything you could borrow a &Self from: the Owned type must implement Borrow<Self>. You can borrow a &[T] from a Vec<T>, so [T] can implement ToOwned<Owned=Vec<T>>, as long as T implements Clone, so that we can copy the slice’s elements into the vector. 
+Similarly, str implements ToOwned<Owned=String>, Path implements ToOwned<Owned=PathBuf>, and so on.
