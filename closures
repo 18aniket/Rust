@@ -116,3 +116,4 @@ The only thing we’ve changed is to add the move keyword before each of the two
 The move keyword tells Rust that a closure doesn’t borrow the variables it uses: it steals them.
 
 The first closure, key_fn, takes ownership of stat. Then the second closure takes ownership of both cities and key_fn.
+
