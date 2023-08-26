@@ -1,1 +1,54 @@
+Sorting a vector of integers is easy:
+
+integers.sort();
+It is, therefore, a sad fact that when we want some data sorted, it’s hardly ever a vector of integers. We typically have records of some kind, and the built-in sort method typically does not work:
+
+struct City {
+    name: String,
+    population: i64,
+    country: String,
+    ...
+}
+
+fn sort_cities(cities: &mut Vec<City>) {
+    cities.sort();  // error: how do you want them sorted?
+}
+
+Rust complains that City does not implement std::cmp::Ord. We need to specify the sort order, like this:
+
+/// Helper function for sorting cities by population.
+fn city_population_descending(city: &City) -> i64 {
+    -city.population
+}
+
+fn sort_cities(cities: &mut Vec<City>) {
+    cities.sort_by_key(city_population_descending);  // ok
+}
+
+This works fine, but it’s more concise to write the helper function as a closure, an anonymous function expression:
+
+fn sort_cities(cities: &mut Vec<City>) {
+    cities.sort_by_key(|city| -city.population);
+}
+
+The closure here is |city| -city.population. It takes an argument city and returns -city.population. 
+Rust infers the argument type and return type from how the closure is used.
+
+Of course, anonymous functions are everywhere these days, 
+even in languages like Java, C#, Python, and C++ that didn’t originally have them.
+
+Capturing Variables:-
+--------------------
+A closure can use data that belongs to an enclosing function. For example:
+
+/// Sort by any of several different statistics.
+fn sort_by_statistic(cities: &mut Vec<City>, stat: Statistic) {
+    cities.sort_by_key(|city| -city.get_statistic(stat));
+}
+
+The closure here uses stat, which is owned by the enclosing function, sort_by_statistic. We say that the closure “captures” stat.
+This is one of the classic features of closures, so naturally, Rust supports it; but in Rust, this feature comes with a string attached.
+
+
+
 
