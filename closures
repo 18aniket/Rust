@@ -49,6 +49,70 @@ fn sort_by_statistic(cities: &mut Vec<City>, stat: Statistic) {
 The closure here uses stat, which is owned by the enclosing function, sort_by_statistic. We say that the closure “captures” stat.
 This is one of the classic features of closures, so naturally, Rust supports it; but in Rust, this feature comes with a string attached.
 
+Rust doesn’t have garbage collection. How will this work? To answer this question, we’ll look at two examples.
+
+Closures That Borrow:-
+----------------------
+First, let’s repeat the opening example of this section:
+
+/// Sort by any of several different statistics.
+fn sort_by_statistic(cities: &mut Vec<City>, stat: Statistic) {
+    cities.sort_by_key(|city| -city.get_statistic(stat));
+}
+
+In this case, when Rust creates the closure, it automatically borrows a reference to stat. 
+It stands to reason: the closure refers to stat, so it must have a reference to it.
+In particular, since the closure contains a reference to stat, Rust won’t let it outlive stat.
+In short, Rust ensures safety by using lifetimes instead of garbage collection.
+
+use std::thread;
+
+fn start_sorting_thread(mut cities: Vec<City>, stat: Statistic)
+    -> thread::JoinHandle<Vec<City>>
+{
+    let key_fn = |city: &City| -> i64 { -city.get_statistic(stat) };
+
+    thread::spawn(|| {
+        cities.sort_by_key(key_fn);
+        cities
+    })
+}
+
+This is a bit more like what our JavaScript example was doing: thread::spawn takes a closure 
+and calls it in a new system thread. Note that || is the closure’s empty argument list.
+
+The new thread runs in parallel with the caller. When the closure returns, the new thread exits. 
+(The closure’s return value is sent back to the calling thread as a JoinHandle value.)
+
+Again, the closure key_fn contains a reference to stat. But this time, Rust can’t guarantee that the reference is used safely. Rust therefore rejects this program:
+
+error: closure may outlive the current function, but it borrows `stat`,
+       which is owned by the current function
+   |
+33 | let key_fn = |city: &City| -> i64 { -city.get_statistic(stat) };
+   |              ^^^^^^^^^^^^^^^^^^^^                       ^^^^
+   |              |                                      `stat` is borrowed here
+   |              may outlive borrowed value `stat`
 
 
+Quite simply, the new thread created by thread::spawn can’t be expected to finish 
+its work before cities and stat are destroyed at the end of the function.
 
+The solution to both problems is the same: tell Rust to move cities and stat into the closures 
+that use them instead of borrowing references to them.
+
+fn start_sorting_thread(mut cities: Vec<City>, stat: Statistic)
+    -> thread::JoinHandle<Vec<City>>
+{
+    let key_fn = move |city: &City| -> i64 { -city.get_statistic(stat) };
+
+    thread::spawn(move || {
+        cities.sort_by_key(key_fn);
+        cities
+    })
+}
+
+The only thing we’ve changed is to add the move keyword before each of the two closures. 
+The move keyword tells Rust that a closure doesn’t borrow the variables it uses: it steals them.
+
+The first closure, key_fn, takes ownership of stat. Then the second closure takes ownership of both cities and key_fn.
