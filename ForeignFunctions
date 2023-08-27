@@ -245,3 +245,7 @@ fn main() {
     }
 }
 
+ The #[link(name = "git2")] attribute leaves a note in the crate to the effect that, 
+ when Rust creates the final executable or shared library, it should link against the git2 library.
+
+ 
