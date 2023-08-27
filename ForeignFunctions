@@ -85,3 +85,62 @@ enum git_error_code: int16_t {
     GIT_EEXISTS    = -4,
     ...
 };
+
+Suppose you have a C struct that uses a union to hold some data and a tag value to indicate which field of the union should be used, similar to a Rust enum.
+
+enum tag {
+    FLOAT = 0,
+    INT   = 1,
+};
+
+union number {
+    float f;
+    short i;
+};
+
+struct tagged_number {
+    tag t;
+    number n;
+};
+
+Rust code can interoperate with this structure by applying #[repr(C)] to the enum, 
+structure, and union types, and using a match statement that selects a union field 
+within a larger struct based on the tag:
+
+#[repr(C)]
+enum Tag {
+    Float = 0,
+    Int = 1
+}
+
+#[repr(C)]
+union FloatOrInt {
+    f: f32,
+    i: i32,
+}
+
+#[repr(C)]
+struct Value {
+    tag: Tag,
+    union: FloatOrInt
+}
+
+fn is_zero(v: Value) -> bool {
+    use self::Tag::*;
+    unsafe {
+        match v {
+            Value { tag: Int, union: FloatOrInt { i: 0 } } => true,
+            Value { tag: Float, union: FloatOrInt { f: num } } => (num == 0.0),
+            _ => false
+        }
+    }
+}
+
+Passing strings between Rust and C is a little harder. 
+C represents a string as a pointer to an array of characters, terminated by a null character.
+Rust, on the other hand, stores the length of a string explicitly, either as a field of a String 
+or as the second word of a fat reference &str.
+
+Rust strings are not null-terminated; in fact, 
+they may include null characters in their contents, like any other character.
+
