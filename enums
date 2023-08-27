@@ -318,3 +318,23 @@ let caption = match photo.tagged_pet() {
     _ => "I'm cute, love me", // generic caption, works for any pet
 };
 
+The wildcard pattern matches any value, but without storing it anywhere. 
+Since Rust requires every match expression to handle all possible values, 
+a wildcard is often required at the end.
+
+Even if you’re very sure the remaining cases can’t occur, 
+you must at least add a fallback arm, perhaps one that panics:
+
+// There are many Shapes, but we only support "selecting"
+// either some text, or everything in a rectangular area.
+// You can't select an ellipse or trapezoid.
+match document.selection() {
+    Shape::TextSpan(start, end) => paint_text_selection(start, end),
+    Shape::Rectangle(rect) => paint_rect_selection(rect),
+    _ => panic!("unexpected selection type"),
+}
+
+Tuple and Struct Patterns:-
+---------------------------
+
+TODO: More Patterns are there.
