@@ -140,13 +140,83 @@ The tag field is for Rust’s internal use.
 
 
 --------------------------------------------
-|    0 |  5  |        |             87    |
+|    0 |  5  |        |             87    |    InThePast(Years, 87)
 --------------------------------------------
    |      |       |            |
-   |
-   |
-   |
-   |
-   |
-   |
-1 tag byte (0 means
+   |      |       |            |
+   |      |       |            |
+   |      |       |            |
+   |      |       |         4 bytes for the u32 field
+   |      |      2 unused bytes (padding for alignment)
+   |    1 byte for the TimeUnit field(5 means years)
+1 tag byte (0 means InThePast)
+
+
+--------------------------------------------
+|   2  |  2  |        |             3    |    InThePast(Hours, 3)
+--------------------------------------------
+
+
+--------------------------------------------
+|   2  |                                   |    JustNow
+--------------------------------------------
+
+ For instance, some generic structs can be stored without a tag at all.
+
+Rich Data Structures Using Enums:-
+----------------------------------
+Enums are also useful for quickly implementing tree-like data structures. 
+For example, suppose a Rust program needs to work with arbitrary JSON data. 
+In memory, any JSON document can be represented as a value of this Rust type:
+
+use std::collections::HashMap;
+
+enum Json {
+    Null,
+    Boolean(bool),
+    Number(f64),
+    String(String),
+    Array(Vec<Json>),
+    Object(Box<HashMap<String, Json>>),
+}
+
+What’s remarkable here is how easy it was to set this up. In C++, one might write a class for this:
+
+class JSON {
+private:
+    enum Tag {
+        Null, Boolean, Number, String, Array, Object
+    };
+    union Data {
+        bool boolean;
+        double number;
+        shared_ptr<string> str;
+        shared_ptr<vector<JSON>> array;
+        shared_ptr<unordered_map<string, JSON>> object;
+
+        Data() {}
+        ~Data() {}
+        ...
+    };
+
+    Tag tag;
+    Data data;
+
+public:
+    bool is_null() const { return tag == Null; }
+    bool is_boolean() const { return tag == Boolean; }
+    bool get_boolean() const {
+        assert(is_boolean());
+        return data.boolean;
+    }
+    void set_boolean(bool value) {
+        this->~JSON();  // clean up string/array/object value
+        tag = Boolean;
+        data.boolean = value;
+    }
+    ...
+};
+
+Generic Enums:-
+---------------
+Enums can be generic.
