@@ -34,4 +34,31 @@ trait Iterator {
 Item is the type of value the iterator produces.
 The next method either returns Some(v), where v is the iterator’s next value, or returns None to indicate the end of the sequence. 
 
+Rust’s for loop brings all these parts together nicely. To iterate over a vector’s elements, you can write:
 
+println!("There's:");
+let v = vec!["antimony", "arsenic", "aluminum", "selenium"];
+
+for element in &v {
+    println!("{}", element);
+}
+
+If there’s a natural way to iterate over some type, that type can implement std::iter::IntoIterator, 
+whose into_iter method takes a value and returns an iterator over it:
+
+trait IntoIterator where Self::IntoIter: Iterator<Item=Self::Item> {
+    type Item;
+    type IntoIter: Iterator;
+    fn into_iter(self) -> Self::IntoIter;
+}
+
+Under the hood, every for loop is just shorthand for calls to IntoIterator and Iterator methods:
+
+let mut iterator = (&v).into_iter();
+while let Some(element) = iterator.next() {
+    println!("{}", element);
+}
+
+The for loop uses IntoIterator::into_iter to convert its operand &v into an iterator and 
+then calls Iterator::next repeatedly. Each time that returns Some(element), the for loop executes its body; 
+and if it returns None, the loop finishes.
