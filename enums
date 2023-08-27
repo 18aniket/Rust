@@ -295,3 +295,26 @@ This pattern is just a variable name. It can match any value, and the matched va
 copied into a new local variable. So in this case, the value of meadow.count_rabbits() is stored 
 in a new local variable n, which we then print.
 
+Other literals can be used as patterns too, including Booleans, characters, and even strings:
+
+let calendar = match settings.get_string("calendar") {
+    "gregorian" => Calendar::Gregorian,
+    "chinese" => Calendar::Chinese,
+    "ethiopian" => Calendar::Ethiopian,
+    other => return parse_error("calendar", other),
+};
+
+In this example, other serves as a catchall pattern like n in the previous example.
+
+These patterns play the same role as a default case in a switch statement, 
+matching values that don’t match any of the other patterns.
+
+If you need a catchall pattern, but you don’t care about the matched value, 
+you can use a single underscore _ as a pattern, the wildcard pattern:
+
+let caption = match photo.tagged_pet() {
+    Pet::Tyrannosaur => "RRRAAAAAHHHHHH",
+    Pet::Samoyed => "*dog thoughts*",
+    _ => "I'm cute, love me", // generic caption, works for any pet
+};
+
