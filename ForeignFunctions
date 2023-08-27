@@ -28,3 +28,60 @@ unsigned char	           c_uchar
 float	                   c_float
 double	                   c_double
 void *, const void *	   *mut c_void, *const c_void
+
+For defining Rust struct types compatible with C structs, you can use the #[repr(C)] attribute.
+Placing #[repr(C)] above a struct definition asks Rust to lay out the struct’s fields in memory 
+the same way a C compiler would lay out the analogous C struct type.
+
+For example, libgit2’s git2/errors.h header file defines the following C struct to provide details about a previously reported error:
+
+typedef struct {
+    char *message;
+    int klass;
+} git_error;
+
+You can define a Rust type with an identical representation as follows:
+
+use std::os::raw::{c_char, c_int};
+
+#[repr(C)]
+pub struct git_error {
+    pub message: *const c_char,
+    pub klass: c_int
+}
+
+The #[repr(C)] attribute affects only the layout of the struct itself, 
+not the representations of its individual fields, so to match the C struct, 
+each field must use the C-like type as well: *const c_char for char *, c_int for int, and so on.
+
+In this particular case, the #[repr(C)] attribute probably doesn’t change the layout of git_error. 
+There really aren’t too many interesting ways to lay out a pointer and an integer.
+But whereas C and C++ guarantee that a structure’s members appear in memory in the order they’re 
+declared, each at a distinct address, Rust reorders fields to minimize the overall size of the 
+struct, and zero-sized types take up no space.
+
+You can also use #[repr(C)] to control the representation of C-style enums:
+
+#[repr(C)]
+#[allow(non_camel_case_types)]
+enum git_error_code {
+    GIT_OK         =  0,
+    GIT_ERROR      = -1,
+    GIT_ENOTFOUND  = -3,
+    GIT_EEXISTS    = -4,
+    ...
+}
+
+You can also ask Rust to give an enum the same representation as some integer type. 
+Starting the preceding definition with #[repr(i16)] would give you a 16-bit type with the 
+same representation as the following C++ enum:
+
+#include <stdint.h>
+
+enum git_error_code: int16_t {
+    GIT_OK         =  0,
+    GIT_ERROR      = -1,
+    GIT_ENOTFOUND  = -3,
+    GIT_EEXISTS    = -4,
+    ...
+};
