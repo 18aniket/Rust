@@ -144,3 +144,24 @@ or as the second word of a fat reference &str.
 Rust strings are not null-terminated; in fact, 
 they may include null characters in their contents, like any other character.
 
+This means that you can’t borrow a Rust string as a C string: if you pass C code a pointer into a Rust string, 
+it could mistake an embedded null character for the end of the string or run off the end looking for a 
+terminating null that isn’t there.
+
+This situation effectively forces Rust to treat C strings as types entirely distinct from String and &str. 
+In the std::ffi module, the CString and CStr types represent owned and borrowed null-terminated arrays of bytes. 
+Compared to String and str, the methods on CString and CStr are quite limited, restricted to construction and conversion to other types.
+
+Declaring Foreign Functions and Variables:-
+-------------------------------------------
+An extern block declares functions or variables defined in some other library 
+that the final Rust executable will be linked with.
+
+For example, on most platforms, every Rust program is linked against the standard C library, 
+so we can tell Rust about the C library’s strlen function like this:
+
+use std::os::raw::c_char;
+
+extern {
+    fn strlen(s: *const c_char) -> usize;
+}
