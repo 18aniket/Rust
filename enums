@@ -276,3 +276,22 @@ Pattern:- RoughTime::InThePast(units,count)                     - FAILURE
 
 The patterns on lines 3 and 5 fail to match. But the pattern on line 7 succeeds
 
+Literals, Variables, and Wildcards in Patterns:-
+------------------------------------------------
+
+So far, we’ve shown match expressions working with enums. 
+Other types can be matched too. When you need something like a C switch statement, 
+use match with an integer value. Integer literals like 0 and 1 can serve as patterns:
+
+match meadow.count_rabbits() {
+    0 => {}  // nothing to say
+    1 => println!("A rabbit is nosing around in the clover."),
+    n => println!("There are {} rabbits hopping about in the meadow", n),
+}
+
+The pattern 0 matches if there are no rabbits in the meadow. 1 matches if there is just one. 
+If there are two or more rabbits, we reach the third pattern, n. 
+This pattern is just a variable name. It can match any value, and the matched value is moved or 
+copied into a new local variable. So in this case, the value of meadow.count_rabbits() is stored 
+in a new local variable n, which we then print.
+
