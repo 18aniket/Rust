@@ -1,1 +1,37 @@
+Rust’s iterators are flexible, expressive, and efficient. 
+Consider the following function, which returns the sum of the first n positive integers (often called the nth triangle number):
+
+fn triangle(n: i32) -> i32 {
+    let mut sum = 0;
+    for i in 1..=n {
+        sum += i;
+    }
+    sum
+}
+
+The expression 1..=n is a RangeInclusive<i32> value. A RangeInclusive<i32> is an iterator that produces the integers from 
+its start value to its end value (both inclusive), so you can use it as the operand of the for loop to sum the values from 1 to n.
+
+But iterators also have a fold method, which you can use in the equivalent definition:
+
+fn triangle(n: i32) -> i32 {
+    (1..=n).fold(0, |sum, item| sum + item)
+}
+
+Starting with 0 as the running total, fold takes each value that 1..=n produces and 
+applies the closure |sum, item| sum + item to the running total and the value.
+
+The Iterator and IntoIterator Traits:-
+--------------------------------------
+An iterator is any value that implements the std::iter::Iterator trait:
+
+trait Iterator {
+    type Item;
+    fn next(&mut self) -> Option<Self::Item>;
+    ... // many default methods
+}
+
+Item is the type of value the iterator produces.
+The next method either returns Some(v), where v is the iterator’s next value, or returns None to indicate the end of the sequence. 
+
 
