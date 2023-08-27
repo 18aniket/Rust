@@ -133,3 +133,20 @@ enum RelationshipStatus {
     },
 }
 
+Enums in Memory :-
+==================
+In memory, enums with data are stored as a small integer tag, plus enough memory to hold all the fields of the largest variant. 
+The tag field is for Rust’s internal use. 
+
+
+--------------------------------------------
+|    0 |  5  |        |             87    |
+--------------------------------------------
+   |      |       |            |
+   |
+   |
+   |
+   |
+   |
+   |
+1 tag byte (0 means
