@@ -62,3 +62,25 @@ while let Some(element) = iterator.next() {
 The for loop uses IntoIterator::into_iter to convert its operand &v into an iterator and 
 then calls Iterator::next repeatedly. Each time that returns Some(element), the for loop executes its body; 
 and if it returns None, the loop finishes.
+
+Creating Iterators:-
+--------------------
+
+iter and iter_mut Methods:-
+===========================
+Most collection types provide iter and iter_mut methods that return the natural iterators over the type, 
+producing a shared or mutable reference to each item.
+
+let v = vec![4, 20, 12, 8, 6];
+let mut iterator = v.iter();
+assert_eq!(iterator.next(), Some(&4));
+assert_eq!(iterator.next(), Some(&20));
+assert_eq!(iterator.next(), Some(&12));
+assert_eq!(iterator.next(), Some(&8));
+assert_eq!(iterator.next(), Some(&6));
+assert_eq!(iterator.next(), None);
+This iterator’s item type is &i32: each call to next produces a reference to the next element, until we reach the end of the vector.
+
+IntoIterator Implementations:-
+==============================
+
