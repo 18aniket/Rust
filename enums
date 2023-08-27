@@ -32,3 +32,54 @@ fn compare(n: i32, m: i32) -> Ordering {
     }
 }
 
+In memory, values of C-style enums are stored as integers. Occasionally it’s useful to tell Rust which integers to use:
+
+enum HttpStatus {
+    Ok = 200,
+    NotModified = 304,
+    NotFound = 404,
+    ...
+}
+
+By default, Rust stores C-style enums using the smallest built-in integer type that can accommodate them. Most fit in a single byte:
+
+use std::mem::size_of;
+assert_eq!(size_of::<Ordering>(), 1);
+assert_eq!(size_of::<HttpStatus>(), 2);  // 404 doesn't fit in a u8
+
+You can override Rust’s choice of in-memory representation by adding a #[repr] attribute to the enum.
+
+Casting a C-style enum to an integer is allowed:
+
+assert_eq!(HttpStatus::Ok as i32, 200);
+
+or use the enum_primitive crate. It contains a macro that autogenerates this kind of conversion code for you.
+
+As with structs, the compiler will implement features like the == operator for you, but you have to ask:
+
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+enum TimeUnit {
+    Seconds, Minutes, Hours, Days, Months, Years,
+}
+
+Enums can have methods, just like structs:
+
+impl TimeUnit {
+    /// Return the plural noun for this time unit.
+    fn plural(self) -> &'static str {
+        match self {
+            TimeUnit::Seconds => "seconds",
+            TimeUnit::Minutes => "minutes",
+            TimeUnit::Hours => "hours",
+            TimeUnit::Days => "days",
+            TimeUnit::Months => "months",
+            TimeUnit::Years => "years",
+        }
+    }
+
+    /// Return the singular noun for this time unit.
+    fn singular(self) -> &'static str {
+        self.plural().trim_end_matches('s')
+    }
+}
+
