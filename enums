@@ -1,1 +1,34 @@
+Simple, C-style enums are straightforward:
+
+enum Ordering {
+    Less,
+    Equal,
+    Greater,
+}
+
+use std::cmp::Ordering;
+
+fn compare(n: i32, m: i32) -> Ordering {
+    if n < m {
+        Ordering::Less
+    } else if n > m {
+        Ordering::Greater
+    } else {
+        Ordering::Equal
+    }
+}
+
+or with all its constructors:
+
+use std::cmp::Ordering::{self, *};    // `*` to import all children
+
+fn compare(n: i32, m: i32) -> Ordering {
+    if n < m {
+        Less
+    } else if n > m {
+        Greater
+    } else {
+        Equal
+    }
+}
 
