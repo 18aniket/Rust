@@ -1,0 +1,8 @@
+Tragically, not every program in the world is written in Rust. 
+There are many critical libraries and interfaces implemented in other languages that 
+we would like to be able to use in our Rust programs.
+
+Rust’s foreign function interface (FFI) lets Rust code call functions written in C, 
+and in some cases C++. 
+Since most operating systems offer C interfaces, Rust’s foreign function interface allows 
+immediate access to all sorts of low-level facilities.
