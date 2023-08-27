@@ -165,3 +165,62 @@ use std::os::raw::c_char;
 extern {
     fn strlen(s: *const c_char) -> usize;
 }
+
+Rust assumes that functions declared inside extern blocks use C conventions for passing arguments 
+and accepting return values. They are defined as unsafe functions. 
+These are the right choices for strlen: it is indeed a C function, 
+and its specification in C requires that you pass it a valid pointer to a properly terminated string, 
+which is a contract that Rust cannot enforce. 
+(Almost any function that takes a raw pointer must be unsafe: 
+safe Rust can construct raw pointers from arbitrary integers, 
+and dereferencing such a pointer would be undefined behavior.)
+
+With this extern block, we can call strlen like any other Rust function, 
+although its type gives it away as a tourist:
+
+use std::ffi::CString;
+
+let rust_str = "I'll be back";
+let null_terminated = CString::new(rust_str).unwrap();
+unsafe {
+    assert_eq!(strlen(null_terminated.as_ptr()), 12);
+}
+
+The CString::new function builds a null-terminated C string. 
+It first checks its argument for embedded null characters, 
+since those cannot be represented in a C string, and returns an error 
+if it finds any (hence the need to unwrap the result). 
+Otherwise, it adds a null byte to the end and returns a CString owning the resulting characters.
+
+The cost of CString::new depends on what type you pass it. It accepts anything that implements Into<Vec<u8>>.
+
+CString dereferences to CStr, whose as_ptr method returns a *const c_char pointing at the start of the string.
+
+You can also declare global variables in extern blocks. POSIX systems have a global variable 
+named environ that holds the values of the process’s environment variables. In C, it’s declared:
+
+extern char **environ;
+
+In Rust, you would say:
+
+use std::ffi::CStr;
+use std::os::raw::c_char;
+
+extern {
+    static environ: *mut *mut c_char;
+}
+
+To print the environment’s first element, you could write:
+
+unsafe {
+    if !environ.is_null() && !(*environ).is_null() {
+        let var = CStr::from_ptr(*environ);
+        println!("first environment variable: {}",
+                 var.to_string_lossy())
+    }
+}
+
+
+Using Functions from Libraries:-
+--------------------------------
+
