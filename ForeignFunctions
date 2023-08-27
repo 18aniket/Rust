@@ -6,3 +6,10 @@ Rust’s foreign function interface (FFI) lets Rust code call functions written 
 and in some cases C++. 
 Since most operating systems offer C interfaces, Rust’s foreign function interface allows 
 immediate access to all sorts of low-level facilities.
+
+Given its primary use as a systems programming language, C has always been surprisingly 
+loose about its types’ representations: an int is typically 32 bits long, but could be longer, 
+or as short as 16 bits; a C char may be signed or unsigned; and so on. 
+To cope with this variability, Rust’s std::os::raw module defines a set of Rust types 
+that are guaranteed to have the same representation as certain C types.
+
