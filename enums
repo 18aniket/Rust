@@ -220,3 +220,59 @@ public:
 Generic Enums:-
 ---------------
 Enums can be generic.
+
+enum Option<T> {
+    None,
+    Some(T),
+}
+
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+
+These types are familiar enough by now, and the syntax for generic enums is the same as for generic structs.
+One unobvious detail is that Rust can eliminate the tag field of Option<T> when the type T is a reference, Box, or other smart pointer type.
+
+Patterns:-
+----------
+Recall the definition of our RoughTime type from earlier in this chapter:
+
+enum RoughTime {
+    InThePast(TimeUnit, u32),
+    JustNow,
+    InTheFuture(TimeUnit, u32),
+}
+
+You need to access the TimeUnit and u32 fields inside the value. 
+Rust doesn’t let you access them directly, by writing rough_time.0 and rough_time.1, because after all, 
+the value might be RoughTime::JustNow, which has no fields. But then, how can you get the data out?
+
+You need a match expression:
+
+ 1  fn rough_time_to_english(rt: RoughTime) -> String {
+ 2      match rt {
+ 3          RoughTime::InThePast(units, count) =>
+ 4              format!("{} {} ago", count, units.plural()),
+ 5          RoughTime::JustNow =>
+ 6              format!("just now"),
+ 7          RoughTime::InTheFuture(units, count) =>
+ 8              format!("{} {} from now", count, units.plural()),
+ 9      }
+10  }
+
+match performs pattern matching; in this example, the patterns are the parts that appear before the => symbol on lines 3, 5, and 7.
+
+Patterns that match RoughTime values look just like the expressions used to create RoughTime values.
+
+This is no coincidence. Expressions produce values; patterns consume values. The two use a lot of the same syntax.
+
+Let’s step through what happens when this match expression runs. 
+Suppose rt is the value RoughTime::InTheFuture(TimeUnit::Months, 1). 
+Rust first tries to match this value against the pattern on line 3.
+
+Value:-   RoughTime::InTheFuture(TimeUnit::Months,1)
+Pattern:- RoughTime::InThePast(units,count)                     - FAILURE
+
+The patterns on lines 3 and 5 fail to match. But the pattern on line 7 succeeds
+
