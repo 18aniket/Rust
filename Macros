@@ -139,3 +139,14 @@ it starts by trying to match the arguments 1, 2, 3 with the pattern for the firs
 The second rule handles vec!["udon", "ramen", "soba"]. The pattern, $( $x:expr ),*, uses a feature we haven’t seen before: 
 repetition. It matches 0 or more expressions, separated by commas. More generally, 
 the syntax $( PATTERN ),* is used to match any comma-separated list, where each item in the list matches PATTERN.
+
+Built-In Macros:-
+-----------------
+The Rust compiler supplies several macros that are helpful when you’re defining your own macros. None of these could be implemented using macro_rules! alone. They’re hardcoded in rustc:
+
+file!(), line!(), column!()
+file!() expands to a string literal: the current filename. 
+line!() and column!() expand to u32 literals giving the current line and column (counting from 1).
+
+If one macro calls another, which calls another, all in different files, and the last macro calls file!(), line!(), 
+or column!(), it will expand to indicate the location of the first macro call.
