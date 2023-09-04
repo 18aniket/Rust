@@ -150,3 +150,9 @@ line!() and column!() expand to u32 literals giving the current line and column 
 
 If one macro calls another, which calls another, all in different files, and the last macro calls file!(), line!(), 
 or column!(), it will expand to indicate the location of the first macro call.
+
+stringify!(...tokens...)
+Expands to a string literal containing the given tokens. 
+The assert! macro uses this to generate an error message that includes the code of the assertion.
+
+Macro calls in the argument are not expanded: stringify!(line!()) expands to the string "line!()".
