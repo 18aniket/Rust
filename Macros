@@ -1,1 +1,109 @@
+Rust supports macros, a way to extend the language in ways that go beyond what you can do with functions alone. 
+For example, we’ve seen the assert_eq! macro, which is handy for tests:
 
+assert_eq!(gcd(6, 10), 2);
+This could have been written as a generic function, but the assert_eq! macro does several things that functions can’t do. 
+One is that when an assertion fails, assert_eq! generates an error message containing the filename and line number of the assertion. 
+Functions have no way of getting that information. Macros can, because the way they work is completely different.
+
+Macros are a kind of shorthand. During compilation, before types are checked and long before any machine code is generated, 
+each macro call is expanded—that is, it’s replaced with some Rust code. The preceding macro call expands to something roughly like this:
+
+match (&gcd(6, 10), &2) {
+    (left_val, right_val) => {
+        if !(*left_val == *right_val) {
+            panic!("assertion failed: `(left == right)`, \
+                    (left: `{:?}`, right: `{:?}`)", left_val, right_val);
+        }
+    }
+
+
+panic! is also a macro, which itself expands to yet more Rust code (not shown here). 
+That code uses two other macros, file!() and line!(). 
+Once every macro call in the crate is fully expanded, Rust moves on to the next phase of compilation.
+
+At run time, an assertion failure would look like this (and would indicate a bug in the gcd() function, since 2 is the correct answer):
+
+thread 'main' panicked at 'assertion failed: `(left == right)`, (left: `17`,
+right: `2`)', gcd.rs:7
+
+Macro calls are always marked with an exclamation point, so they stand out when you’re reading code, 
+and they can’t be called accidentally when you meant to call a function. 
+Rust macros never insert unmatched brackets or parentheses. And Rust macros come with pattern matching, 
+making it easier to write macros that are both maintainable and appealing to use.
+
+Macro Basics:-
+--------------
+Macro calls are always marked with an exclamation point, so they stand out when you’re reading code, 
+and they can’t be called accidentally when you meant to call a function. Rust macros never insert unmatched brackets or parentheses. 
+And Rust macros come with pattern matching, making it easier to write macros that are both maintainable and appealing to use.
+
+A macro defined with macro_rules! works entirely by pattern matching. The body of a macro is just a series of rules:
+
+( pattern1 ) => ( template1 );
+
+( pattern2 ) => ( template2 );
+
+...
+
+Incidentally, you can use square brackets or curly braces instead of parentheses around the pattern or the template; it makes no difference to Rust. Likewise, when you call a macro, these are all equivalent:
+
+assert_eq!(gcd(6, 10), 2);
+assert_eq![gcd(6, 10), 2];
+assert_eq!{gcd(6, 10), 2}
+
+
+macro_rules! assert_eq {
+   ($left:expr, $right:expr)=>({
+      match(&$left,&$right){
+           (left_val,right_val) => {
+              if!(*left_val == *right_val){
+                panic!("assertion failed")
+              }
+           }
+      }
+   });
+}
+
+gcd(6, 10), 2);
+
+gcd(6,10) - $left:expr
+2         - $right:expr
+
+It’s a common mistake to include the fragment type in the output template: writing $left:expr rather than just $left. 
+Rust does not immediately detect this kind of error. It sees $left as a substitution, 
+and then it treats :expr just like everything else in the template: tokens to be included in the macro’s output. 
+So the errors won’t happen until you call the macro; then it will generate bogus output that won’t compile.
+
+Unintended Consequences:-
+-------------------------
+
+First, why does this macro create the variables left_val and right_val? 
+Is there some reason we can’t simplify the template to look like this?
+
+if !($left == $right) {
+    panic!("assertion failed: `(left == right)` \
+            (left: `{:?}`, right: `{:?}`)", $left, $right)
+}
+
+To answer this question, try mentally expanding the macro call assert_eq!(letters.pop(), Some('z')). 
+What would the output be? Naturally, Rust would plug the matched expressions into the template in multiple places. 
+It seems like a bad idea to evaluate the expressions all over again when building the error message, though, 
+and not just because it would take twice as long: since letters.pop() removes a value from a vector, 
+it’ll produce a different value the second time we call it! 
+That’s why the real macro computes $left and $right only once and stores their values.
+
+Moving on to the second question: why does this macro borrow references to the values of $left and $right? 
+Why not just store the values in variables, like this?
+
+macro_rules! bad_assert_eq {
+    ($left:expr, $right:expr) => ({
+        match ($left, $right) {
+            (left_val, right_val) => {
+                if !(left_val == right_val) {
+                    panic!("assertion failed" /* ... */);
+                }
+            }
+        }
+ });
+}
