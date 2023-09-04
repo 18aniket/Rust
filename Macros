@@ -107,3 +107,35 @@ macro_rules! bad_assert_eq {
         }
  });
 }
+
+For the particular case we’ve been considering, where the macro arguments are integers, this would work fine. 
+But if the caller passed, say, a String variable as $left or $right, this code would move the value out of the variable!
+
+Repetition:-
+------------
+The standard vec! macro comes in two forms:
+// Repeat a value N times
+let buffer = vec![0_u8; 1000];
+
+// A list of values, separated by commas
+let numbers = vec!["udon", "ramen", "soba"];
+It can be implemented like this:
+
+macro_rules! vec {
+    ($elem:expr ; $n:expr) => {
+        ::std::vec::from_elem($elem, $n)
+    };
+    ( $( $x:expr ),* ) => {
+        <[_]>::into_vec(Box::new([ $( $x ),* ]))
+    };
+    ( $( $x:expr ),+ ,) => {
+        vec![ $( $x ),* ]
+    };
+}
+
+When Rust expands a macro call like vec![1, 2, 3], 
+it starts by trying to match the arguments 1, 2, 3 with the pattern for the first rule, in this case $elem:expr ; $n:expr.
+
+The second rule handles vec!["udon", "ramen", "soba"]. The pattern, $( $x:expr ),*, uses a feature we haven’t seen before: 
+repetition. It matches 0 or more expressions, separated by commas. More generally, 
+the syntax $( PATTERN ),* is used to match any comma-separated list, where each item in the list matches PATTERN.
