@@ -1,1 +1,7 @@
+Rust’s standard library features for input and output are organized around three traits, Read, BufRead, and Write:
 
+Values that implement Read have methods for byte-oriented input. They’re called readers.
+
+Values that implement BufRead are buffered readers. They support all the methods of Read, plus methods for reading lines of text and so forth.
+
+Values that implement Write support both byte-oriented and UTF-8 text output. They’re called writers
