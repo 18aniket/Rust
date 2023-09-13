@@ -4,4 +4,61 @@ Values that implement Read have methods for byte-oriented input. They’re calle
 
 Values that implement BufRead are buffered readers. They support all the methods of Read, plus methods for reading lines of text and so forth.
 
-Values that implement Write support both byte-oriented and UTF-8 text output. They’re called writers
+Values that implement Write support both byte-oriented and UTF-8 text output. They’re called writers.
+
+
+Read
+|
+|_ stdin
+|_File
+|_TcpStream
+|____________BufRead
+              |_BufReader<R>
+              |_Cursor<&[u8]>
+              |_StdinLock
+
+Write
+|
+|_stdout
+|_stderr
+|_File
+|_TcpStream
+|_Vec<u8>
+|_BufWriter<W>
+
+Readers are values that your program can read bytes from. Examples include:
+
+Files opened using std::fs::File::open(filename)
+
+std::net::TcpStreams, for receiving data over the network
+
+std::io::stdin(), for reading from the process’s standard input stream
+
+std::io::Cursor<&[u8]> and std::io::Cursor<Vec<u8>> values, which are readers that “read” from a byte array or vector that’s already in memory
+
+Writers are values that your program can write bytes to. Examples include:
+
+Files opened using std::fs::File::create(filename)
+
+std::net::TcpStreams, for sending data over the network
+
+std::io::stdout() and std::io:stderr(), for writing to the terminal
+
+Vec<u8>, a writer whose write methods append to the vector
+
+std::io::Cursor<Vec<u8>>, which is similar but lets you both read and write data, and seek to different positions within the vector
+
+std::io::Cursor<&mut [u8]>, which is much like std::io::Cursor<Vec<u8>>, except that it can’t grow the buffer, since it’s just a slice of some existing byte array
+
+The three std::io traits Read, BufRead, and Write, along with Seek, are so commonly used that there’s a prelude module containing only those traits:
+
+#use std::io::prelude::*
+
+You’ll see this once or twice in this chapter. We also make a habit of importing the std::io module itself:
+
+#use std::io::{self, Read, Write, ErrorKind};
+
+The self keyword here declares io as an alias to the std::io module. 
+That way, std::io::Result and std::io::Error can be written more concisely as io::Result and io::Error, and so on.
+
+
