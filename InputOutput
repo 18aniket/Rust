@@ -61,4 +61,50 @@ You’ll see this once or twice in this chapter. We also make a habit of importi
 The self keyword here declares io as an alias to the std::io module. 
 That way, std::io::Result and std::io::Error can be written more concisely as io::Result and io::Error, and so on.
 
+Readers:-
+=========
+std::io::Read has several methods for reading data. All of them take the reader itself by mut reference.
+* reader.read(&mut buffer)
 
+Reads some bytes from the data source and stores them in the given buffer. The type of the buffer argument is &mut [u8]. This reads up to buffer.len() bytes.
+The return type is io::Result<u64>, which is a type alias for Result<u64, io::Error>. 
+On success, the u64 value is the number of bytes read—which may be equal to or less than buffer.len(), 
+even if there’s more data to come, at the whim of the data source. Ok(0) means there is no more input to read.
+On error, .read() returns Err(err), where err is an io::Error value. An io::Error is printable, for the benefit of humans; for programs, 
+it has a .kind() method that returns an error code of type io::ErrorKind. The members of this enum have names like PermissionDenied and ConnectionReset. 
+Most indicate serious errors that can’t be ignored, but one kind of error should be handled specially.
+io::ErrorKind::Interrupted corresponds to the Unix error code EINTR, which means the read happened to be interrupted by a signal. 
+Unless the program is designed to do something clever with signals, it should just retry the read.
+
+* reader.read_to_end(&mut byte_vec)
+
+Reads all remaining input from this reader, appending it to byte_vec, which is a Vec<u8>. Returns an io::Result<usize>, the number of bytes read.
+There is no limit on the amount of data this method will pile into the vector, so don’t use it on an untrusted source. 
+(You can impose a limit using the .take() method, described in the next list.)
+
+* reader.read_to_string(&mut string)
+
+This is the same, but appends the data to the given String. If the stream isn’t valid UTF-8, this returns an ErrorKind::InvalidData error.
+In some programming languages, byte input and character input are handled by different types. 
+These days, UTF-8 is so dominant that Rust acknowledges this de facto standard and supports UTF-8 everywhere.
+Other character sets are supported with the open source encoding crate.
+
+* reader.read_exact(&mut buf)
+
+Reads exactly enough data to fill the given buffer. 
+The argument type is &[u8]. If the reader runs out of data before reading buf.len() bytes, this returns an ErrorKind::UnexpectedEof error.
+
+Those are the main methods of the Read trait. In addition, 
+there are three adapter methods that take the reader by value, transforming it into an iterator or a different reader:
+
+* reader.bytes()
+Returns an iterator over the bytes of the input stream. The item type is io::Result<u8>, so an error check is required for every byte.
+Furthermore, this calls reader.read() once per byte, which will be very inefficient if the reader is not buffered.
+
+* reader.chain(reader2)
+Returns a new reader that produces all the input from reader, followed by all the input from reader2.
+
+* reader.take(n)
+Returns a new reader that reads from the same source as reader, but is limited to n bytes of input.
+
+There is no method for closing a reader. Readers and writers typically implement Drop so that they are closed automatically.
