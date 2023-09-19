@@ -1,3 +1,15 @@
+Rust’s Box type serves as another example of ownership. A Box<T> is a pointer to a value of type T stored on the heap. 
+Calling Box::new(v) allocates some heap space, moves the value v into it, and returns a Box pointing to the heap space. 
+Since a Box owns the space it points to, when the Box is dropped, it frees the space too.
+
+For example, you can allocate a tuple in the heap like so:
+
+{
+    let point = Box::new((0.625, 0.5));  // point allocated here
+    let label = format!("{:?}", point);  // label allocated here
+    assert_eq!(label, "(0.625, 0.5)");
+}       
+
 You  can  move  values  from  one  owner  to  another. This allows you to  build,  rearrange, and tear down the tree.
 
 Very simple types like integers, floating-point numbers, and characters are excused from the ownership rules. These are called Copy types.
