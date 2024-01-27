@@ -1,1 +1,25 @@
-A runtime for writing **reliable network applications** without compromising speed.
+A runtime for writing reliable network applications without compromising speed.
+
+
+tokio = { version = "1", features = ["full"] }
+
+As a library author your goal should be to provide the lightest weight crate that is based on Tokio. To achieve this you should ensure that you only enable the features you need. This allows users to pick up your crate without having to enable unnecessary features.
+
+
+Working With Tasks
+==================
+Asynchronous programs in Rust are based around lightweight, non-blocking units of execution called --tasks--. The tokio::task module provides important tools for working with tasks:
+
+++ The "spawn" function and "JoinHandle" type, for scheduling a new task on the Tokio runtime and awaiting the output of a spawned task, respectively,
+++ Functions for running blocking operations in an asynchronous task context.
+
+++ The tokio::task module is present only when the “rt” feature flag is enabled.
+
+## channels (oneshot, mpsc, watch, and broadcast), for sending values between tasks,
+## a non-blocking "Mutex", for controlling access to a shared, mutable value,
+## an asynchronous "Barrier" type, for multiple tasks to synchronize before beginning a computation.
+
+++ Finally, Tokio provides a runtime for executing asynchronous tasks. Most applications can use the #[tokio::main] macro to run their code on the Tokio runtime. However, this macro provides only basic configuration options.
+
+++ As an alternative, the tokio::runtime module provides more powerful APIs for configuring and managing runtimes. You should use that module if the #[tokio::main] macro doesn’t provide the functionality you need.
+
