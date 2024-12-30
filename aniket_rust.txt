@@ -1,0 +1,599 @@
+https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html
+
+To ensure memory safety, after the line let s2 = s1; , Rust considers s1 as no longer valid. Therefore, Rust doesn’t need to free anything when s1 goes out of scope. Check out what happens when you try to use s1 after s2 is created; it won’t work.
+
+//-------
+While this works, taking ownership and then returning ownership with every function is a bit tedious. What if we want to let a function use a value but not take ownership? It’s quite annoying that anything we pass in also needs to be passed back if we want to use it again, in addition to any data resulting from the body of the function that we might want to return as well.
+//--------
+
+Luckily for us, Rust has a feature for using a value without transferring ownership, called references.
+
+//---------
+
+A reference is like a pointer in that it’s an address we can follow to access the data stored at that address; that data is owned by some other variable. Unlike a pointer, a reference is guaranteed to point to a valid value of a particular type for the life of that reference.
+
+//---------
+
+We call the action of creating a reference borrowing. As in real life, if a person owns something, you can borrow it from them. When you’re done, you have to give it back. You don’t own it.
+
+//--------
+
+So, what happens if we try to modify something we’re borrowing?
+
+fn main() { let s = String::from("hello");
+change(&s); }
+fn change(some_string: &String) { some_string.push_str(", world");
+}
+
+Just as variables are immutable by default, so are references. We’re not allowed to modify something we have a reference to.
+
+//--------
+
+
+fn main() { let mut s = String::from("hello");
+change(&mut s); }
+fn change(some_string: &mut String) { some_string.push_str(", world");
+}
+
+//--------
+
+Mutable references have one big restriction: if you have a mutable reference to a value, you can have no other references to that value. This code that attempts to create two mutable references to s will fail:
+let mut s = String::from("hello");
+let r1 = &mut s; 
+let r2 = &mut s; println!("{}, {}", r1, r2);
+
+//--------
+
+A data race is similar to a race condition and happens when these three behaviors occur:
+Two or more pointers access the same data at the same time. At least one of the pointers is being used to write to the data. There’s no mechanism being used to synchronize access to the data.
+
+//------
+
+Need to understand :- 
+
+Rust enforces a similar rule for combining mutable and immutable references. This code results in an error:
+let mut s = String::from("hello");
+let r1 = &s; // no problem 
+let r2 = &s; // no problem 
+let r3 = &mut s; // BIG PROBLEM
+println!("{}, {}, and {}", r1, r2, r3);
+
+//-------
+
+Note that a reference’s scope starts from where it is introduced and continues through the last time that reference is used. For instance, this code will compile because the last usage of the immutable references, the println! , occurs before the mutable reference is introduced:
+let mut s = String::from("hello");
+let r1 = &s; // no problem 
+let r2 = &s; // no problem 
+println!("{r1} and {r2}"); // variables r1 and r2 will not be used after this point
+let r3 = &mut s; // no problem println!("{r3}");
+
+//-------
+
+The scopes of the immutable references r1 and r2 end after the println! where they are last used, which is before the mutable reference r3 is created. These scopes don’t overlap, so this code is allowed: the compiler can tell that the reference is no longer being used at a point before the end of the scope.
+
+//--------
+
+Dangling References :-
+
+fn main() { let reference_to_nothing = dangle();
+}
+fn dangle() -> &String { let s = String::from("hello"); 
+&s
+}
+
+
+//--------
+
+You can also define structs that don’t have any fields! These are called unit-like structs because they behave similarly to () , the unit type that we mentioned in “The Tuple Type” section. Unit-like structs can be useful when you need to implement a trait on some type but don’t have any data that you want to store in the type itself.
+
+//--------
+
+struct AlwaysEqual;
+fn main() { 
+  let subject = AlwaysEqual;
+}
+To define AlwaysEqual , we use the struct keyword, the name we want, and then a semicolon. No need for curly brackets or parentheses! Then we can get an instance of AlwaysEqual in the subject variable in a similar way: using the name we defined, without any curly brackets or parentheses.
+
+//---------
+
+The main reason for using methods instead of functions, in addition to providing method syntax and not having to repeat the type of self in every method’s signature, is for organization. We’ve put all the things we can do with an instance of a type in one impl block rather than making future users of our code search for capabilities of Rectangle in various places in the library we provide.
+
+//---------
+
+Note that we can choose to give a method the same name as one of the struct’s fields.
+
+//---------
+
+Where’s the -> Operator?
+
+Rust doesn’t have an equivalent to the -> operator; instead, Rust has a feature called automatic referencing and dereferencing. Calling methods is one of the few places in Rust that has this behavior.
+
+p1.distance(&p2); (&p1).distance(&p2); //Both
+are same.
+
+//---------
+
+Associated Functions :-
+
+All functions defined within an impl block are called associated functions because they’re associated with the type named after the impl . We can define associated functions that don’t have self as their first parameter (and thus are not methods) because they don’t need an instance of the type to work with. We’ve already used one function like this: the String::from function that’s defined on the String type.
+
+
+//---------
+
+Multiple impl Blocks
+
+Each struct is allowed to have multiple impl blocks. For example, Listing 5-15 is equivalent to the code shown in Listing 5-16, which has each method in its own impl block.
+impl Rectangle { 
+fn area(&self) -> u32 { 
+self.width * self.height
+} }
+
+impl Rectangle { 
+fn can_hold(&self, other: &Rectangle) -> bool { self.width > other.width && self.height > other.height
+} }
+
+//-----------------
+
+A package can contain multiple binary crates and optionally one library crate.
+
+As a package grows, you can extract parts into separate crates that become external dependencies.
+
+
+These features, sometimes collectively referred to as the module system, include:
+Packages: A Cargo feature that lets you build, test, and share crates 
+Crates: A tree of modules that produces a library or executable 
+Modules and use: Let you control the organization, scope, and privacy of paths Paths: A way of naming an item, such as a struct, function, or module.
+
+A crate is the smallest amount of code that the Rust compiler considers at a time.
+
+A package is a bundle of one or more crates that provides a set of functionality. A package contains a Cargo.toml file that describes how to build those crates. Cargo is actually a package that contains the binary crate for the command-line tool you’ve been using to build your code.
+
+The Cargo package also contains a library crate that the binary crate depends on.
+
+A package can contain as many binary crates as you like, but at most only one library crate.
+WHY ???
+
+In the project directory, there’s a Cargo.toml file, giving us a package. There’s also a src directory that contains main.rs. Open Cargo.toml in your text editor, and note there’s no mention of src/main.rs.
+
+we have a package that only contains src/main.rs, meaning it only contains a binary crate named my-project . If a package contains src/main.rs and src/lib.rs, it has two crates: a binary and a library, both with the same name as the package. A package can have multiple binary crates by placing files in the src/bin directory: each file will be a separate binary crate.
+
+*Start from the crate root: When compiling a crate, the compiler first looks in the crate root file (usually src/lib.rs for a library crate or src/main.rs for a binary crate) for code to compile.
+
+*Declaring modules: In the crate root file, you can declare new modules; say you declare a “garden” module with mod garden; . The compiler will look for the module’s code in these places:
+=Inline, within curly brackets that replace the semicolon following mod garden 
+=In the file src/garden.rs 
+=In the file src/garden/mod.rs
+
+
+*Declaring submodules: In any file other than the crate root, you can declare submodules. For example, you might declare mod vegetables; in src/garden.rs. The compiler will look for the submodule’s code within the directory named for the parent module in these places: =Inline, directly following mod vegetables , within curly brackets instead of the semicolon =In the file src/garden/vegetables.rs 
+=In the file src/garden/vegetables/mod.rs
+
+*Paths to code in modules: Once a module is part of your crate, you can refer to code in that module from anywhere else in that same crate, as long as the privacy rules allow, using the path to the code. For example, an Asparagus type in the garden vegetables module would be found at crate::garden::vegetables::Asparagus .
+
+*Private vs. public: Code within a module is private from its parent modules by default. To make a module public, declare it with pub mod instead of mod . To make items within a public module public as well, use pub before their declarations.
+
+
+backyard 
+├── Cargo.lock
+├── Cargo.toml 
+└── src 
+	├── garden 
+	      └── vegetables.rs
+      ├── garden.rs 
+      └── main.rs
+
+
+Filename: src/main.rs
+use crate::garden::vegetables::Asparagus;
+
+pub mod garden;
+
+fn main() { 
+  let plant = Asparagus {}; 
+  println!("I'm growing {plant:?}!");
+}
+
+The pub mod garden; line tells the compiler to include the code it finds in src/garden.rs, which is:
+
+Filename: src/garden.rs 
+
+pub mod vegetables;
+
+Here, pub mod vegetables; means the code in src/garden/vegetables.rs is included too. That code is:
+
+#[derive(Debug)] 
+pub struct Asparagus {}
+
+
+//----------------
+
+DEFINING AN ENUM
+
+enum IpAddrKind { 
+	V4, 
+	V6,
+}
+
+However, representing the same concept using just an enum is more concise: rather than an enum inside a struct, we can put data directly into each enum variant. This new definition of the IpAddr enum says that both V4 and V6 variants will have associated String values:
+
+enum IpAddr { 
+	V4(String), 
+	V6(String),
+}
+
+let home = IpAddr::V4(String::from("127.0.0.1")); 
+let loopback = IpAddr::V6(String::from("::1"));
+
+Another way:
+
+struct Ipv4Addr { // --snip-}
+struct Ipv6Addr { // --snip-}
+
+enum IpAddr { 
+	V4(Ipv4Addr), 
+	V6(Ipv6Addr),
+}
+
+This code illustrates that you can put any kind of data inside an enum variant: strings, numeric types, or structs, for example. You can even include another enum! Also, standard library types are often not much more complicated than what you might come up with.
+
+Note that even though the standard library contains a definition for IpAddr , we can still create and use our own definition without conflict because we haven’t brought the standard library’s definition into our scope.
+
+
+enum Message { 
+	Quit, 
+	Move { x: i32, y: i32 }, 
+	Write(String), 
+	ChangeColor(i32, i32, i32),
+}
+
+
+This enum has four variants with different types:
+
+Quit has no data associated with it at all. Move has named fields, like a struct does. Write includes a single String . 
+ChangeColor includes three i32 values.
+
+
+There is one more similarity between enums and structs: just as we’re able to define methods on structs using impl , we’re also able to define methods on enums. Here’s a method named 
+call that we could define on our Message enum:
+
+
+impl Message { 
+	fn call(&self) { // method body would be defined here
+} }
+let m = Message::Write(String::from("hello")); m.call();
+
+
+OPTION ENUM And Its Advantage over NULL Values:-
+
+This section explores a case study of Option , which is another enum defined by the standard library. The Option type encodes the very common scenario in which a value could be something or it could be nothing.
+
+
+For example, if you request the first item in a non-empty list, you would get a value. If you request the first item in an empty list, you would get nothing. Expressing this concept in terms of the type system means the compiler can check whether you’ve handled all the cases you should be handling; this functionality can prevent bugs that are extremely common in other programming languages.
+
+
+As such, Rust does not have nulls, but it does have an enum that can encode the concept of a value being present or absent. This enum is Option<T> , and it is defined by the standard library as follows:
+
+enum Option<T> { 
+	None, 
+	Some(T),
+}
+
+The Option<T> enum is so useful that it’s even included in the prelude; you don’t need to bring it into scope explicitly. Its variants are also included in the prelude: you can use Some and None directly without the Option:: prefix. The Option<T> enum is still just a regular enum, and Some(T) and None are still variants of type Option<T> .
+
+
+Here are some examples of using Option values to hold number types and string types:
+
+let some_number = Some(5); 
+let some_char = Some('e');
+let absent_number: Option<i32> = None;
+
+
+The type of some_number is Option<i32> . The type of some_char is Option<char> , which is a different type. Rust can infer these types because we’ve specified a value inside the Some variant. 
+
+For absent_number , Rust requires us to annotate the overall Option type: the compiler can’t infer the type that the corresponding Some variant will hold by looking only at a None value.
+
+In short, because Option<T> and T (where T can be any type) are different types, the compiler won’t let us use an Option<T> value as if it were definitely a valid value.
+
+So how do you get the T value out of a Some variant when you have a value of type Option<T> so that you can use that value? The Option<T> enum has a large number of methods that are useful in a variety of situations; you can check them out in its documentation.
+//----------------
+
+CLOSURES:-
+
+Rust’s closures are anonymous functions you can save in a variable or pass as arguments to other functions. You can create the closure in one place and then call the closure elsewhere to evaluate it in a different context. Unlike functions, closures can capture values from the scope in which they’re defined. We’ll demonstrate how these closure features allow for code reuse and behavior customization.
+
+Here’s the scenario: Every so often, our t-shirt company gives away an exclusive, limited-edition shirt to someone on our mailing list as a promotion. People on the mailing list can optionally add their favorite color to their profile. If the person chosen for a free shirt has their favorite color set, they get that color shirt. If the person hasn’t specified a favorite color, they get whatever color the company currently has the most of.
+
+
+There are many ways to implement this. For this example, we’re going to use an enum called ShirtColor that has the variants Red and Blue (limiting the number of colors available for simplicity). We represent the company’s inventory with an Inventory struct that has a field named shirts that contains a Vec<ShirtColor> representing the shirt colors currently in stock. The method giveaway defined on Inventory gets the optional shirt color preference of the free shirt winner, and returns the shirt color the person will get.
+
+
+
+impl Inventory { 
+	fn giveaway(&self, user_preference: 		Option<ShirtColor>) -> ShirtColor 	{ user_preference.unwrap_or_else(|| 	self.most_stocked())
+	}
+fn most_stocked(&self) -> ShirtColor { 
+	let mut num_red = 0; 
+	let mut num_blue = 0;
+for color in &self.shirts { 
+	match color { 
+		ShirtColor::Red => num_red += 1, 		ShirtColor::Blue => num_blue += 1,
+}
+} 
+if num_red > num_blue { ShirtColor::Red
+} else { 
+	ShirtColor::Blue
+} } 
+}
+
+
+In the giveaway method, we get the user preference as a parameter of type Option<ShirtColor> and call the unwrap_or_else method on user_preference .
+
+fn giveaway(&self, user_preference: Option<ShirtColor>) -> ShirtColor { 
+	user_preference.unwrap_or_else(|| 	self.most_stocked())
+}
+
+
+The unwrap_or_else method on Option<T> is defined by the standard library.
+
+It takes one argument: a closure without any arguments that returns a value T (the same type stored in the Some variant of the Option<T> , in this case ShirtColor ).
+
+If the Option<T> is the Some variant, unwrap_or_else returns the value from within the Some . If the Option<T> is the None variant, unwrap_or_else calls the closure and returns the value returned by the closure.
+
+We specify the closure expression || self.most_stocked() as the argument to unwrap_or_else . This is a closure that takes no parameters itself (if the closure had parameters, they would appear between the two vertical bars). The body of the closure calls self.most_stocked() .
+
+The closure captures an immutable reference to the self Inventory instance and passes it with the code we specify to the unwrap_or_else method. Functions, on the other hand, are not able to capture their environment in this way.
+
+TODO (Understand the above paragraph).
+
+
+DIFFERENCE BETWEEN CLOSURES AND FUNCTIONS:-
+
+There are more differences between functions and closures. Closures don’t usually require you to annotate the types of the parameters or the return value like fn functions do. Type annotations are required on functions because the types are part of an explicit interface exposed to your users. 
+
+
+ALL VALID:-
+
+fn add_one_v1 (x: u32) -> u32    { x + 1 }
+let add_one_v2 = |x: u32| -> u32 { x + 1 }; let add_one_v3 = |x|             { x + 1 }; 
+let add_one_v4 = |x|               x + 1 ;
+
+
+SPECIAL NOTE:-
+
+Because there are no type annotations, we can call the closure with any type, which we’ve done here with String the first time. If we then try to call example_closure with an integer, we’ll get an error.
+
+let example_closure = |x| x;
+let s =  example_closure(String::from("hello")); 
+let n = example_closure(5);
+
+
+Capturing References or Moving Ownership:-
+------------------------------------------
+
+Closures can capture values from their environment in three ways, which directly map to the three ways a function can take a parameter: borrowing immutably, borrowing mutably, and taking ownership. The closure will decide which of these to use based on what the body of the function does with the captured values.
+
+
+fn main() { 
+	let list = vec![1, 2, 3]; 	println!("Before defining closure: 	{list:?}");
+	let only_borrows = || println!("From 	closure: {list:?}");
+	println!("Before calling closure: 	{list:?}"); 
+	only_borrows(); 
+	println!("After calling closure: 	{list:?}");
+}
+
+Before defining closure: [1, 2, 3] 
+Before calling closure: [1, 2, 3] 
+From closure: [1, 2, 3] 
+After calling closure: [1, 2, 3]
+
+fn main() { 
+	let mut list = vec![1, 2, 3]; 	println!("Before defining closure: {list:?}");
+	let mut borrows_mutably = || 	list.push(7);
+	borrows_mutably(); 
+	println!("After calling closure: {list:?}");
+}
+
+Before defining closure: [1, 2, 3] 
+After calling closure: [1, 2, 3, 7]
+
+
+SPECIAL NOTE:-
+
+We don’t use the closure again after the closure is called, so the mutable borrow ends. Between the closure definition and the closure call, an immutable borrow to print isn’t allowed because no other borrows are allowed when there’s a mutable borrow. Try adding a println! there to see what error message you get!
+
+
+If you want to force the closure to take ownership of the values it uses in the environment even though the body of the closure doesn’t strictly need ownership, you can use the move keyword before the parameter list.
+
+
+This technique is mostly useful when passing a closure to a new thread to move the data so that it’s owned by the new thread.
+let’s briefly explore spawning a new thread using a closure that needs the move keyword.
+
+
+fn main() { 
+	let list = vec![1, 2, 3]; 	println!("Before defining closure: 	{list:?}");
+	thread::spawn(move || println!("From 	thread: {list:?}")) .join() .unwrap();
+}
+
+
+The new thread might finish before the rest of the main thread finishes, or the main thread might finish first. If the main thread maintained ownership of list but ended before the new thread did and dropped list , the immutable reference in the thread would be invalid.
+
+
+Using Message Passing to Transfer Data Between Threads:-
+
+Do not communicate by sharing memory; instead, share memory by communicating.
+
+To accomplish message-sending concurrency, Rust’s standard library provides an implementation of channels. A channel is a general programming concept by which data is sent from one thread to another.
+
+we’ll create a channel but not do anything with it. Note that this won’t compile yet because Rust can’t tell what type of values we want to send over the channel.
+
+use std::sync::mpsc;
+fn main() { 
+	let (tx, rx) = mpsc::channel();
+}
+
+
+use std::sync::mpsc; use std::thread;
+fn main() { 
+	let (tx, rx) = mpsc::channel();
+	thread::spawn(move || { 
+		let val = String::from("hi"); 		tx.send(val).unwrap();
+}); }
+
+
+Again, we’re using thread::spawn to create a new thread and then using move to move tx into the closure so the spawned thread owns tx . The spawned thread needs to own the transmitter to be able to send messages through the channel. The transmitter has a send method that takes the value we want to send. The send method returns a Result<T, E> type, so if the receiver has already been dropped and there’s nowhere to send a value, the send operation will return an error. In this example, we’re calling unwrap to panic in case of an error.
+
+
+use std::sync::mpsc; 
+use std::thread;
+
+fn main() { 
+	let (tx, rx) = mpsc::channel();
+	thread::spawn(move || { let val = 	String::from("hi"); 	tx.send(val).unwrap();
+	});
+	let received = rx.recv().unwrap(); 	println!("Got: {received}");
+}
+
+
+The receiver has two useful methods: "recv" and try_recv . We’re using recv , short for receive, which will block the main thread’s execution and wait until a value is sent down the channel. Once a value is sent, recv will return it in a Result<T, E> . When the transmitter closes, recv will return an error to signal that no more values will be coming.
+
+The "try_recv" method doesn’t block, but will instead return a Result<T, E> immediately: an Ok value holding a message if one is available and an Err value if there aren’t any messages this time. Using try_recv is useful if this thread has other work to do while waiting for messages: we could write a loop that calls try_recv every so often, handles a message if one is available, and otherwise does other work for a little while until checking again.
+
+Channels and Ownership Transference:-
+-------------------------------------
+
+use std::sync::mpsc; 
+use std::thread;
+
+fn main() { 
+	let (tx, rx) = mpsc::channel();
+	thread::spawn(move || { let val = 	String::from("hi"); 	tx.send(val).unwrap(); println!("val is 	{val}");
+	});
+	let received = rx.recv().unwrap(); 	println!("Got: {received}");
+}
+
+Here, we try to print val after we’ve sent it down the channel via tx.send . Allowing this would be a bad idea: once the value has been sent to another thread, that thread could modify or drop it before we try to use the value again. Potentially, the other thread’s modifications could cause errors or unexpected results due to inconsistent or nonexistent data. However, Rust gives us an error if we try to compile the code.
+
+use std::sync::mpsc; 
+use std::thread; 
+use std::time::Duration;
+
+fn main() { 
+	let (tx, rx) = mpsc::channel();
+	thread::spawn(move || { 
+		let vals = 				vec![ String::from("hi"), 	String::from("from"), 	String::from("the"), 	String::from("thread"),
+	];
+	for val in vals { 
+		tx.send(val).unwrap(); 			thread::sleep(Duration::from_secs(1));
+	} });
+	for received in rx { println!("Got: 	{received}");
+} }
+
+you should see the following output with a 1-second pause in between each line:
+Got: hi 
+Got: from 
+Got: the 
+Got: thread
+
+//----------------
+
+
+FEARLESS CONCURRENCY
+
+
+The Rust standard library uses a 1:1 model of thread implementation, whereby a program uses one operating system thread per one language thread. There are crates that implement other models of threading that make different tradeoffs to the 1:1 model.
+
+
+Waiting for All Threads to Finish Using join Handles:-
+
+
+use std::thread; use std::time::Duration;
+fn main() { 
+let handle = thread::spawn(|| { 
+     for i in 1..10 { println!("hi number {i} from the spawned thread!"); thread::sleep(Duration::from_millis(1));
+} });
+for i in 1..5 { 
+    println!("hi number {i} from the main thread!"); thread::sleep(Duration::from_millis(1));
+} 
+handle.join().unwrap();
+}
+----------------------------------
+Output :-
+
+hi number 1 from the main thread! 
+hi number 2 from the main thread! 
+hi number 1 from the spawned thread! 
+hi number 3 from the main thread! 
+hi number 2 from the spawned thread! 
+hi number 4 from the main thread! 
+hi number 3 from the spawned thread! 
+hi number 4 from the spawned thread! 
+hi number 5 from the spawned thread! 
+hi number 6 from the spawned thread! 
+hi number 7 from the spawned thread! 
+hi number 8 from the spawned thread! 
+hi number 9 from the spawned thread!
+
+----------------------------------
+
+
+
+Calling join on the handle blocks the thread currently running until the thread represented by the handle terminates.
+
+Blocking a thread means that thread is prevented from performing work or exiting.
+
+The two threads continue alternating, but the main thread waits because of the call to handle.join() and does not end until the spawned thread is finished.
+
+But let’s see what happens when we instead move handle.join() before the for loop in main , like this:
+
+use std::thread; use std::time::Duration;
+fn main() { 
+let handle = thread::spawn(|| { for i in 1..10 { println!("hi number {i} from the spawned thread!"); thread::sleep(Duration::from_millis(1));
+}
+}); 
+
+handle.join().unwrap();
+
+for i in 1..5 { println!("hi number {i} from the main thread!"); thread::sleep(Duration::from_millis(1));
+} }
+
+-----------------------------------
+hi number 1 from the spawned thread! 
+hi number 2 from the spawned thread! 
+hi number 3 from the spawned thread! 
+hi number 4 from the spawned thread! 
+hi number 5 from the spawned thread! 
+hi number 6 from the spawned thread! 
+hi number 7 from the spawned thread! 
+hi number 8 from the spawned thread! 
+hi number 9 from the spawned thread! 
+hi number 1 from the main thread! 
+hi number 2 from the main thread! 
+hi number 3 from the main thread! 
+hi number 4 from the main thread!
+------------------------------------
+
+
+
+COMPLETE IT.
+//---------------
+
+A Shortcut for Propagating Errors: the ? Operator
+
+TODO
+//--------------------------------------
+
+
+//--------------------------------------
+
+https://zemail.me/mailbox
+
+
+SELinux by Example: Using Security Enhanced Linux
+
+//--------------------------------------
+
+
+
+
+
+
